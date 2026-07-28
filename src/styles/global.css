@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+@import './variable.scss';
+
+:root {
+  font-size: 1px;
+}
+
+body {
+  font-size: initial;
+}
+
+@theme {
+  --spacing: 1rem;
+  --default-transition-duration: 300ms;
+  --color-bg: var(--bg-color);
+  --color-border: var(--border-color);
+  --color-primary: oklch(50.8% 0.118 165.612);
+}
+
+@utility f-center {
+  @apply flex items-center justify-center;
+}
+
+/* * {
+  scrollbar-width: none;
+} */
