@@ -1,4 +1,5 @@
-import { createNode, isParsedNode, type MaterialSchema } from '@/materials';
+import type { MaterialSchema, PageSchema } from '@/directive/schema/types';
+import { createNode, isParsedNode } from '@/materials';
 import { defineStore } from 'pinia';
 
 export const useEditorStore = defineStore('editor', () => {
@@ -8,7 +9,18 @@ export const useEditorStore = defineStore('editor', () => {
     property: true,
   });
 
-  const nodes = ref<MaterialSchema[]>([]);
+  const page = ref<PageSchema>({
+    canvas: {
+      width: 1920,
+      height: 1080,
+      backgroundColor: '#ffffff',
+    },
+    nodes: [],
+  });
+
+  const canvas = toRef(page.value, 'canvas');
+
+  const nodes = toRef(page.value, 'nodes');
 
   const selectedNodeIds = ref<string[]>([]);
   const selectedNodeId = computed(() =>
@@ -37,6 +49,8 @@ export const useEditorStore = defineStore('editor', () => {
   };
 
   return {
+    page,
+    canvas,
     panelVisible,
     nodes,
     selectedNodeId,

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { createNode, getMaterialComponent, type MaterialSchema } from '@/materials';
+import type { MaterialSchema } from '@/directive/schema/types';
+import { createNode, getMaterialComponent } from '@/materials';
 import { useEditorStore } from '@/stores/editor';
 import { debounce } from '@/utils';
 import { storeToRefs } from 'pinia';
@@ -25,7 +26,7 @@ const vm = getCurrentInstance();
 
 const editorStore = useEditorStore();
 
-const { nodes, selectedNodeIds } = storeToRefs(editorStore);
+const { canvas, nodes, selectedNodeIds } = storeToRefs(editorStore);
 
 function getNodeStyle(node: MaterialSchema, index: number) {
   return {
@@ -148,10 +149,10 @@ function onZoomChange() {
   moveableRef.value?.updateRect();
 }
 
-const canvasSize = reactive({ width: 1920, height: 1080 });
 const canvasStyle = computed(() => ({
-  width: `${canvasSize.width}px`,
-  height: `${canvasSize.height}px`,
+  width: `${canvas.value.width}px`,
+  height: `${canvas.value.height}px`,
+  backgroundColor: canvas.value.backgroundColor,
 }));
 </script>
 
@@ -182,8 +183,8 @@ const canvasStyle = computed(() => ({
       :thick="20"
       :width="containerSize.width"
       :height="containerSize.height"
-      :canvas-width="canvasSize.width"
-      :canvas-height="canvasSize.height"
+      :canvas-width="canvas.width"
+      :canvas-height="canvas.height"
       :lines="lines"
       :palette="{
         bgColor: '#1f2937',
@@ -202,7 +203,7 @@ const canvasStyle = computed(() => ({
     >
       <div
         ref="stageRef"
-        class="relative bg-white flex-[0_0_auto]"
+        class="relative flex-[0_0_auto]"
         :style="canvasStyle"
         @dragover.prevent
         @mousedown.self="onClear"

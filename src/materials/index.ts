@@ -1,5 +1,6 @@
 import type { Component } from 'vue';
-import type { Cagetory, CagetoryKey, InstallCtx, Material, MaterialSchema } from './types';
+import type { Cagetory, CagetoryKey, InstallCtx, Material } from './types';
+import type { MaterialSchema } from '@/directive/schema/types';
 
 export type * from './types';
 
