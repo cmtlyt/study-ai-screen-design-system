@@ -25,20 +25,26 @@ const vm = getCurrentInstance();
 
 const editorStore = useEditorStore();
 
-const { nodes } = storeToRefs(editorStore);
+const { nodes, selectedNodeIds } = storeToRefs(editorStore);
 
-function getNodeStyle(node: MaterialSchema) {
+function getNodeStyle(node: MaterialSchema, index: number) {
   return {
+    ...node.style,
     position: 'absolute',
     left: `${node.layout.x}px`,
     top: `${node.layout.y}px`,
     width: `${node.layout.width}px`,
     height: `${node.layout.height}px`,
-    ...node.style,
+    zIndex: index + 1,
   };
 }
 
 type SelectableElement = HTMLElement | SVGElement;
+
+function getNodeElement(nodeId: string) {
+  return stageRef.value?.querySelector<SelectableElement>(`[data-node-id="${nodeId}"]`) || null;
+}
+
 const selectedTarget = shallowRef<SelectableElement | SelectableElement[] | null>();
 
 function onDrop(event: DragEvent) {
@@ -49,20 +55,23 @@ function onDrop(event: DragEvent) {
 
   editorStore.addNode(node);
   editorStore.selectNode(node.id);
-
-  nextTick(() => {
-    selectedTarget.value = vm?.proxy?.$el.querySelector(`[data-node-id="${node.id}"]`);
-  });
 }
 
 function onSelect(event: MouseEvent, node: MaterialSchema) {
   editorStore.selectNode(node.id);
-  selectedTarget.value = event.currentTarget as HTMLElement;
 
   nextTick(() => {
     moveableRef.value?.dragStart(event);
   });
 }
+
+watch(
+  selectedNodeIds,
+  (ids) => {
+    selectedTarget.value = ids.map(getNodeElement).filter(Boolean) as SelectableElement[];
+  },
+  { deep: true, flush: 'post' },
+);
 
 function getNodeByTarget(ele: SelectableElement): MaterialSchema | null {
   if (!ele.dataset.nodeId) return null;
@@ -95,13 +104,11 @@ function onResize(event: OnResize) {
 
 function onClear() {
   editorStore.clearSelected();
-  selectedTarget.value = null;
 }
 
 function onSelectEnd(event: OnSelectEnd) {
   const ids = event.selected.map((ele) => ele.dataset.nodeId).filter(Boolean) as string[];
   editorStore.selectNodes(ids);
-  selectedTarget.value = event.selected;
 }
 
 function onDragGroup(event: OnDragGroup) {
@@ -202,12 +209,12 @@ const canvasStyle = computed(() => ({
         @drop="onDrop"
       >
         <component
-          v-for="node in nodes"
+          v-for="(node, index) in nodes"
           :key="node.id"
           :is="getMaterialComponent(node.type)"
           v-bind="node.props"
           class="canvas-node"
-          :style="getNodeStyle(node)"
+          :style="getNodeStyle(node, index)"
           :data-node-id="node.id"
           @mousedown="onSelect($event, node)"
         />
