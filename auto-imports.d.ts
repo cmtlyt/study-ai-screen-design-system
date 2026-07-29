@@ -7,6 +7,11 @@
 export {}
 declare global {
   const EffectScope: typeof import('vue').EffectScope
+  const ElColorPicker: typeof import('element-plus/es').ElColorPicker
+  const ElInput: typeof import('element-plus/es').ElInput
+  const ElInputNumber: typeof import('element-plus/es').ElInputNumber
+  const ElSelect: typeof import('element-plus/es').ElSelect
+  const ElSwitch: typeof import('element-plus/es').ElSwitch
   const Icon: typeof import('@iconify/vue').Icon
   const _api: typeof import('@iconify/vue')._api
   const addAPIProvider: typeof import('@iconify/vue').addAPIProvider

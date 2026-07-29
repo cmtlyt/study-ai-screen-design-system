@@ -5,6 +5,7 @@ import ToolbarRight from './toolbar/toolbar-right.vue';
 import MaterialPanel from './panels/material/index.vue';
 import LayerPanel from './panels/layer/index.vue';
 import CanvasRoot from './canvas/index.vue';
+import PropertyPanel from './panels/property/index.vue';
 
 defineOptions({
   name: 'ScreenEditor',
@@ -48,7 +49,9 @@ const { panelVisible } = useEditorStore();
         <CanvasRoot />
       </div>
       <!-- 属性 -->
-      <aside class="border-l" :class="[panelVisible.property ? 'w-256' : 'w-0']"></aside>
+      <aside class="border-l" :class="[panelVisible.property ? 'w-400' : 'w-0']">
+        <PropertyPanel />
+      </aside>
     </main>
   </div>
 </template>

@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import type { Cagetory, CagetoryKey, InstallCtx, Material } from './types';
+import type { Cagetory, CagetoryKey, InstallCtx, Material, Setter } from './types';
 import type { MaterialSchema } from '@/directive/schema/types';
 
 export type * from './types';
@@ -38,8 +38,15 @@ export function getMaterialComponent(_type: MaterialSchema['type']) {
   return componentMap.get(_type);
 }
 
+const settersMap = new Map<MaterialSchema['type'], Setter[]>();
+
+export function getMaterialSetters(_type: MaterialSchema['type']) {
+  return settersMap.get(_type);
+}
+
 const register: InstallCtx['register'] = (material, component) => {
   componentMap.set(material.schema.type, component);
+  settersMap.set(material.schema.type, material.setters);
   materials.push(material);
 };
 

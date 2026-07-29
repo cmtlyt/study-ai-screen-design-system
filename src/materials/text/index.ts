@@ -1,7 +1,7 @@
-import type { InstallCtx, Material } from '../types';
+import { defineMaterial, type InstallCtx } from '../types';
 import TextMaterial from './component.vue';
 
-const textMaterial: Material = {
+const textMaterial = defineMaterial({
   name: '文本',
   icon: 'icon-park-outline:text',
   cagetory: 'info',
@@ -22,7 +22,26 @@ const textMaterial: Material = {
       content: '文本',
     },
   },
-};
+  setters: [
+    {
+      key: 'style.color',
+      label: '颜色',
+      type: 'color',
+      span: 8,
+    },
+    {
+      key: 'style.fontSize',
+      label: '字体大小',
+      type: 'number',
+      span: 16,
+    },
+    {
+      key: 'props.content',
+      label: '内容',
+      type: 'input',
+    },
+  ],
+});
 
 export function install(ctx: InstallCtx) {
   ctx.register(textMaterial, TextMaterial);

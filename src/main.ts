@@ -7,6 +7,7 @@ import router from './router';
 import { Icon } from '@iconify/vue';
 import { registerGlobalDirectives } from './directive/index.ts';
 
+import 'element-plus/dist/index.css';
 import 'element-plus/theme-chalk/dark/css-vars.css';
 import './styles/global.css';
 

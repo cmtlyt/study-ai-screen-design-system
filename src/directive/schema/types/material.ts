@@ -15,3 +15,5 @@ export interface MaterialSchema {
   style?: Partial<CSSStyleDeclaration>;
   props: Record<string, any>;
 }
+
+export type DefineSchema = Omit<MaterialSchema, 'id'>;
