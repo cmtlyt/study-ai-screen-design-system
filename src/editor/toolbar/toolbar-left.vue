@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useUndoRedo } from '@/directive/composables/use-undo-redo';
 import { useEditorStore } from '@/stores/editor';
 
 defineOptions({
@@ -6,6 +7,8 @@ defineOptions({
 });
 
 const { panelVisible } = useEditorStore();
+
+const { canUndo, canRedo, undo, redo } = useUndoRedo();
 </script>
 
 <template>
@@ -21,6 +24,8 @@ const { panelVisible } = useEditorStore();
       ],
       // 激活态
       ['[&>.active]:bg-primary', '[&>.active]:border-primary'],
+      // 禁用态
+      ['[&>.disabled]:opacity-50', '[&>.disabled]:cursor-not-allowed'],
     ]"
   >
     <span v-trigger:material="panelVisible" :class="{ active: panelVisible.material }">
@@ -32,7 +37,7 @@ const { panelVisible } = useEditorStore();
     <span v-trigger:layer="panelVisible" :class="{ active: panelVisible.layer }">
       <vue-icon icon="ci:layer" />
     </span>
-    <span><vue-icon icon="ci:undo" /></span>
-    <span><vue-icon icon="ci:redo" /></span>
+    <span :class="{ disabled: !canUndo }" @click="undo"><vue-icon icon="ci:undo" /></span>
+    <span :class="{ disabled: !canRedo }" @click="redo"><vue-icon icon="ci:redo" /></span>
   </div>
 </template>

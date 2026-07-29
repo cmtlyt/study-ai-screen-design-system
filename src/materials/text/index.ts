@@ -15,10 +15,10 @@ const textMaterial = defineMaterial({
       height: 100,
     },
     style: {
-      fontSize: '16px',
       color: '#000',
     },
     props: {
+      size: 16,
       content: '文本',
     },
   },
@@ -30,7 +30,7 @@ const textMaterial = defineMaterial({
       span: 8,
     },
     {
-      key: 'style.fontSize',
+      key: 'props.size',
       label: '字体大小',
       type: 'number',
       span: 16,

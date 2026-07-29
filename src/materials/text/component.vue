@@ -2,9 +2,9 @@
 defineOptions({
   name: 'TextMaterial',
 });
-defineProps<{ content: string }>();
+defineProps<{ content: string; size: number }>();
 </script>
 
 <template>
-  <span>{{ content }}</span>
+  <span :style="{ fontSize: `${size}px` }">{{ content }}</span>
 </template>
