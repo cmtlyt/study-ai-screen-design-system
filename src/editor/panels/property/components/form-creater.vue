@@ -17,6 +17,7 @@ const componentMap: Record<SetterType, Component> = {
   select: ElSelect,
   switch: ElSwitch,
   color: ElColorPicker,
+  checkbox: ElCheckbox,
 };
 
 const { applyChange, startBatch, commitBatch } = useUndoRedo();
@@ -30,6 +31,7 @@ const { applyChange, startBatch, commitBatch } = useUndoRedo();
           <el-form-item :label="setter.label">
             <component
               :is="componentMap[setter.type]"
+              v-bind="setter.props"
               :model-value="getDeepProp(formData, setter.key)"
               @focus="startBatch"
               @blur="commitBatch"

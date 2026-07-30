@@ -18,7 +18,7 @@ const layoutSetters: PositionLayoutLayoutSetters = [
   { key: 'layout.y', label: 'Y', type: 'number', span: 12 },
 ];
 
-const setters = getMaterialSetters(selectedNode.value!.type) || [];
+const setters = computed(() => getMaterialSetters(selectedNode.value!.type) || []);
 </script>
 
 <template>

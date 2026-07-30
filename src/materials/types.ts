@@ -3,12 +3,14 @@ import type { Component } from 'vue';
 
 export type CagetoryKey = 'chart' | 'form' | 'info';
 
-export type SetterType = 'input' | 'select' | 'color' | 'number' | 'switch';
+export type SetterType = 'input' | 'select' | 'color' | 'number' | 'switch' | 'checkbox';
 
 export interface Setter {
   key: string;
   label: string;
   type: SetterType;
+  span?: number;
+  props?: Record<string, any>;
   [key: string]: any;
 }
 
@@ -33,8 +35,23 @@ export interface InstallCtx {
 type ComputedKeys<T extends Record<string, any>> =
   T extends Record<infer Keys extends string, any> ? Keys : '';
 
+type SkipType = number | string | boolean;
+
+type ComputedDeepKeys<T extends Record<string, any>> = ComputedKeys<{
+  [
+    K in keyof T as K extends string
+      ? T[K] extends SkipType
+        ? K
+        : | K
+          | (any[] extends T[K]
+              ? `${K}.${number}${T[K][number] extends SkipType ? '' : `.${ComputedDeepKeys<T[K][number]>}`}`
+              : `${K}.${ComputedDeepKeys<T[K]>}`)
+      : never
+  ]: any;
+}>;
+
 type ComputedSchemaKeys<S extends DefineSchema> =
-  | `props.${ComputedKeys<S['props']>}`
+  | `props.${ComputedDeepKeys<S['props']>}`
   | (S['style'] extends Record<string, any> ? `style.${ComputedKeys<S['style']>}` : never)
   | 'name';
 
