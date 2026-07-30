@@ -50,7 +50,8 @@
     "vue-tsc": "^3.3.7",
     "vue3-moveable": "^0.28.0",
     "vue3-selecto": "^1.12.3",
-    "vue3-sketch-ruler": "2.4.0"
+    "vue3-sketch-ruler": "2.4.0",
+    "zod": "^4.4.3"
   },
   "engines": {
     "node": "^22.18.0 || >=24.12.0"

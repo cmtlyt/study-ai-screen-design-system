@@ -2,6 +2,29 @@ import { useUndoRedo } from '@/composables/use-undo-redo';
 import type { MaterialSchema, PageSchema } from '@/schema/types';
 import { createNode, isParsedNode } from '@/materials';
 import { defineStore } from 'pinia';
+import { z } from 'zod';
+
+const pageSchema = z.object({
+  name: z.string().min(1),
+  canvas: z.object({
+    width: z.number().min(1),
+    height: z.number().min(1),
+    backgroundColor: z.string(),
+  }),
+  nodes: z.array(
+    z.object({
+      type: z.string(),
+      name: z.string(),
+      layout: z.object({
+        x: z.number().min(0),
+        y: z.number().min(0),
+        width: z.number().min(1),
+        height: z.number().min(1),
+      }),
+      props: z.record(z.string(), z.any()),
+    }),
+  ),
+});
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange, startBatch, commitBatch } = useUndoRedo();
@@ -13,6 +36,7 @@ export const useEditorStore = defineStore('editor', () => {
   });
 
   const page = ref<PageSchema>({
+    name: '未命名画布',
     canvas: {
       width: 1920,
       height: 1080,
@@ -107,8 +131,34 @@ export const useEditorStore = defineStore('editor', () => {
     if (!~index) return;
     const newNodes = nodes.value.slice();
     const oldNode = newNodes[index]!;
-    newNodes[index] = { ...oldNode, ...newNode, id: oldNode.id, type: oldNode.type };
+    newNodes[index] = createNode({ ...oldNode, ...newNode, id: oldNode.id, type: oldNode.type });
     setValue(newNodes);
+  };
+
+  const updatePage = (newPage: PageSchema) => {
+    const result = pageSchema.safeParse(newPage);
+    if (!result.success) return result.error;
+
+    newPage = result.data as PageSchema;
+
+    const oldPage = page.value;
+    const nodeMap = new Map(oldPage.nodes.map((item) => [item.id, item]));
+
+    const newNodes = newPage.nodes.map((node) => {
+      const oldNode = nodeMap.get(node.id);
+      nodeMap.delete(node.id);
+      if (!oldNode) {
+        const { id: _, ...rest } = node;
+        return createNode(rest);
+      }
+      return createNode({ ...oldNode, ...node, id: oldNode.id, type: oldNode.type });
+    });
+
+    startBatch();
+    setValue(newPage.name, page.value, 'name');
+    setValue(newNodes, page.value, 'nodes');
+    setValue({ ...newPage.canvas }, page.value, 'canvas');
+    commitBatch();
   };
 
   return {
@@ -131,5 +181,6 @@ export const useEditorStore = defineStore('editor', () => {
     moveBottom,
     toggleLock,
     updateNode,
+    updatePage,
   };
 });

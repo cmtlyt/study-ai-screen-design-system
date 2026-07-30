@@ -17,4 +17,4 @@ export interface MaterialSchema {
   props: Record<string, any>;
 }
 
-export type DefineSchema = Omit<MaterialSchema, 'id' | 'locked'>;
+export type DefineMaterialSchema = Omit<MaterialSchema, 'id' | 'locked'>;

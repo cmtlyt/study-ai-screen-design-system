@@ -1,4 +1,5 @@
-import type { DefineSchema, MaterialPositionLayout } from '@/schema/types';
+import type { DefineMaterialSchema, MaterialPositionLayout } from '@/schema/types';
+import type { ComputedDeepKeys, ComputedKeys } from '@/types';
 import type { Component } from 'vue';
 
 export type CagetoryKey = 'chart' | 'form' | 'info';
@@ -18,7 +19,7 @@ export interface Material {
   name: string;
   icon: string;
   cagetory: CagetoryKey;
-  schema: DefineSchema;
+  schema: DefineMaterialSchema;
   setters: Setter[];
 }
 
@@ -32,25 +33,7 @@ export interface InstallCtx {
   register: (material: Material, component: Component) => void;
 }
 
-type ComputedKeys<T extends Record<string, any>> =
-  T extends Record<infer Keys extends string, any> ? Keys : '';
-
-type SkipType = number | string | boolean;
-
-type ComputedDeepKeys<T extends Record<string, any>> = ComputedKeys<{
-  [
-    K in keyof T as K extends string
-      ? T[K] extends SkipType
-        ? K
-        : | K
-          | (any[] extends T[K]
-              ? `${K}.${number}${T[K][number] extends SkipType ? '' : `.${ComputedDeepKeys<T[K][number]>}`}`
-              : `${K}.${ComputedDeepKeys<T[K]>}`)
-      : never
-  ]: any;
-}>;
-
-type ComputedSchemaKeys<S extends DefineSchema> =
+type ComputedSchemaKeys<S extends DefineMaterialSchema> =
   | `props.${ComputedDeepKeys<S['props']>}`
   | (S['style'] extends Record<string, any> ? `style.${ComputedKeys<S['style']>}` : never)
   | 'name';
@@ -64,7 +47,7 @@ export type PositionLayoutLayoutSetters = DefineSetter<`layout.${keyof MaterialP
 export type NodeInfoSetters = DefineSetter<`name` | `locked`>[];
 
 export function defineMaterial<
-  Schema extends DefineSchema,
+  Schema extends DefineMaterialSchema,
   Setters extends DefineSetter<ComputedSchemaKeys<Schema>>[],
 >(material: Material & { schema: Schema } & { setters: Setters }): Material {
   return material;

@@ -1,6 +1,6 @@
 import type { Component } from 'vue';
 import type { Cagetory, CagetoryKey, InstallCtx, Material, Setter } from './types';
-import type { MaterialSchema } from '@/schema/types';
+import type { MaterialSchema, DefineMaterialSchema } from '@/schema/types';
 
 export type * from './types';
 
@@ -56,15 +56,20 @@ Object.values<(ctx: InstallCtx) => void>(
 
 const PARSED_NODE = Symbol('PARSED_NODE');
 
-export function createNode(node: MaterialSchema) {
+export function createNode(node: Partial<MaterialSchema> & DefineMaterialSchema): MaterialSchema {
+  if (isParsedNode(node) && node.id) return node as MaterialSchema;
+  if (!node.type) {
+    throw new Error('node.type is required');
+  }
   return {
     ...node,
+    // @ts-expect-error PARSED_NODE is a symbol
     [PARSED_NODE]: true,
-    locked: false,
-    id: crypto.randomUUID(),
+    locked: node.locked || false,
+    id: node.id || crypto.randomUUID(),
   };
 }
 
-export function isParsedNode(node: MaterialSchema) {
+export function isParsedNode(node: DefineMaterialSchema) {
   return Boolean((node as any)[PARSED_NODE]);
 }

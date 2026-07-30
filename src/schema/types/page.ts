@@ -7,6 +7,7 @@ export interface CanvasSchema {
 }
 
 export interface PageSchema {
+  name: string;
   canvas: CanvasSchema;
   nodes: MaterialSchema[];
 }

@@ -1,25 +1,27 @@
 <script setup lang="ts">
 import type { DefineSetter } from '@/materials';
 import { useEditorStore } from '@/stores/editor';
-import { storeToRefs } from 'pinia';
 import FormCreater from './form-creater.vue';
+import type { ComputedDeepKeys } from '@/types';
 
 defineOptions({
   name: 'CanvasProperty',
 });
 
 const editorStore = useEditorStore();
-const { canvas } = storeToRefs(editorStore);
 
-const setters: DefineSetter<keyof typeof canvas.value>[] = [
-  { key: 'width', label: '宽度', type: 'number' },
-  { key: 'height', label: '高度', type: 'number' },
-  { key: 'backgroundColor', label: '背景色', type: 'color' },
+type SetterKeys = `canvas.${ComputedDeepKeys<typeof editorStore.canvas>}` | 'page.name';
+
+const setters: DefineSetter<SetterKeys>[] = [
+  { key: 'page.name', label: '画布名称', type: 'input' },
+  { key: 'canvas.width', label: '宽度', type: 'number' },
+  { key: 'canvas.height', label: '高度', type: 'number' },
+  { key: 'canvas.backgroundColor', label: '背景色', type: 'color' },
 ];
 </script>
 
 <template>
   <div>
-    <FormCreater :setters="setters" :form-data="canvas" />
+    <FormCreater :setters="setters" :form-data="editorStore" />
   </div>
 </template>

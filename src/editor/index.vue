@@ -11,16 +11,16 @@ defineOptions({
   name: 'ScreenEditor',
 });
 
-const { panelVisible } = useEditorStore();
+const { page, panelVisible } = useEditorStore();
 </script>
 
 <template>
-  <div class="editor h-screen flex flex-col bg-bg select-none">
+  <div class="h-screen flex flex-col bg-bg select-none">
     <header
-      class="header flex-[0_0_auto] w-full h-56 border-border border-b flex items-center px-16"
+      class="relative flex-[0_0_auto] w-full h-56 border-border border-b flex items-center justify-between px-16"
     >
       <ToolbarLeft />
-      <div class="flex-1"></div>
+      <div class="absolute left-1/2 top-1/2 -translate-1/2">{{ page.name }}</div>
       <ToolbarRight />
     </header>
     <main
