@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUndoRedo } from '@/directive/composables/use-undo-redo';
+import { useUndoRedo } from '@/composables/use-undo-redo';
 import type { Setter, SetterType } from '@/materials';
 import { getDeepProp } from '@/utils';
 
@@ -19,7 +19,7 @@ const componentMap: Record<SetterType, Component> = {
   color: ElColorPicker,
 };
 
-const { applyChange } = useUndoRedo();
+const { applyChange, startBatch, commitBatch } = useUndoRedo();
 </script>
 
 <template>
@@ -31,6 +31,8 @@ const { applyChange } = useUndoRedo();
             <component
               :is="componentMap[setter.type]"
               :model-value="getDeepProp(formData, setter.key)"
+              @focus="startBatch"
+              @blur="commitBatch"
               @update:model-value="(value: any) => applyChange(formData, setter.key, value)"
             />
           </el-form-item>

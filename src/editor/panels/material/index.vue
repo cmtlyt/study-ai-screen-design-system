@@ -12,7 +12,7 @@ defineOptions({
 
 const cagetorys = getMaterialCagetorys();
 
-const activeCagetory = ref<CagetoryKey>('chart');
+const activeCagetory = ref<CagetoryKey>('info');
 
 const currentMaterials = computed(() => {
   return getMaterialsByCagetory(activeCagetory.value);

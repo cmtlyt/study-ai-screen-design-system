@@ -1,32 +1,36 @@
 <script setup lang="ts">
-import type { MaterialSchema } from '@/directive/schema/types';
+import type { MaterialSchema } from '@/schema/types';
 import { createNode, getMaterialComponent } from '@/materials';
 import { useEditorStore } from '@/stores/editor';
-import { debounce } from '@/utils';
 import { storeToRefs } from 'pinia';
-import Moveable, {
-  type OnDrag,
-  type OnDragGroup,
-  type OnResize,
-  type OnResizeGroup,
-} from 'vue3-moveable';
+import Moveable from 'vue3-moveable';
 import Selecto from 'vue3-selecto';
 import SketchRuler from 'vue3-sketch-ruler';
+import { useCanvasRuler } from './composables/use-canvas-ruler';
+import { useMoveable } from './composables/use-moveable';
+import { useSelection } from './composables/use-selection';
 import 'vue3-sketch-ruler/lib/style.css';
-
-type OnSelectEnd = Parameters<NonNullable<InstanceType<typeof Selecto>['onSelectEnd']>>[0];
 
 defineOptions({
   name: 'CanvasRoot',
 });
 
-const moveableRef = useTemplateRef<InstanceType<typeof Moveable>>('moveableRef');
+const moveableRef = useTemplateRef('moveableRef');
 const stageRef = useTemplateRef('stageRef');
-const vm = getCurrentInstance();
 
 const editorStore = useEditorStore();
 
-const { canvas, nodes, selectedNodeIds } = storeToRefs(editorStore);
+const { canvas, nodes, selectedNode } = storeToRefs(editorStore);
+
+const { onStart, onEnd, onDrag, onResize, onDragGroup, onResizeGroup } = useMoveable({
+  moveableRef,
+});
+
+const { selectedTarget, onSelect, onClear, onSelectEnd } = useSelection({ stageRef, moveableRef });
+
+const { palette, lines, scale, canvasStyle, containerSize, onZoomChange } = useCanvasRuler({
+  moveableRef,
+});
 
 function getNodeStyle(node: MaterialSchema, index: number) {
   return {
@@ -40,14 +44,6 @@ function getNodeStyle(node: MaterialSchema, index: number) {
   };
 }
 
-type SelectableElement = HTMLElement | SVGElement;
-
-function getNodeElement(nodeId: string) {
-  return stageRef.value?.querySelector<SelectableElement>(`[data-node-id="${nodeId}"]`) || null;
-}
-
-const selectedTarget = shallowRef<SelectableElement | SelectableElement[] | null>();
-
 function onDrop(event: DragEvent) {
   const node = createNode(JSON.parse(event.dataTransfer?.getData('schema') || '{}'));
 
@@ -58,102 +54,18 @@ function onDrop(event: DragEvent) {
   editorStore.selectNode(node.id);
 }
 
-function onSelect(event: MouseEvent, node: MaterialSchema) {
-  editorStore.selectNode(node.id);
+const commandMap: Record<string, typeof editorStore.copyNode> = {
+  copy: editorStore.copyNode,
+  remove: editorStore.removeNode,
+  moveTop: editorStore.moveTop,
+  moveBottom: editorStore.moveBottom,
+  toggleLock: editorStore.toggleLock,
+};
 
-  nextTick(() => {
-    moveableRef.value?.dragStart(event);
-  });
+function onCommand(command: string) {
+  if (!selectedNode.value) return;
+  commandMap[command]?.(selectedNode.value);
 }
-
-watch(
-  selectedNodeIds,
-  (ids) => {
-    selectedTarget.value = ids.map(getNodeElement).filter(Boolean) as SelectableElement[];
-  },
-  { deep: true, flush: 'post' },
-);
-
-function getNodeByTarget(ele: SelectableElement): MaterialSchema | null {
-  if (!ele.dataset.nodeId) return null;
-  return editorStore.findNode(ele.dataset.nodeId) || null;
-}
-
-function onDrag(event: OnDrag) {
-  if (!event.target) return;
-  const node = getNodeByTarget(event.target);
-  if (!node) return;
-
-  event.target.style.left = `${event.left}px`;
-  event.target.style.top = `${event.top}px`;
-  node.layout.x = event.left;
-  node.layout.y = event.top;
-}
-
-function onResize(event: OnResize) {
-  if (!event.target) return;
-  const node = getNodeByTarget(event.target);
-  if (!node) return;
-
-  event.target.style.width = `${event.width}px`;
-  event.target.style.height = `${event.height}px`;
-  node.layout.width = event.width;
-  node.layout.height = event.height;
-
-  onDrag(event.drag);
-}
-
-function onClear() {
-  editorStore.clearSelected();
-}
-
-function onSelectEnd(event: OnSelectEnd) {
-  const ids = event.selected.map((ele) => ele.dataset.nodeId).filter(Boolean) as string[];
-  editorStore.selectNodes(ids);
-}
-
-function onDragGroup(event: OnDragGroup) {
-  event.events.forEach(onDrag);
-}
-
-function onResizeGroup(event: OnResizeGroup) {
-  event.events.forEach(onResize);
-}
-
-const lines = ref({ h: [], v: [] });
-const scale = ref(1);
-const containerSize = reactive({ width: 0, height: 0 });
-
-onMounted(() => {
-  if (!vm?.proxy?.$el) return;
-  const container = vm.proxy.$el as HTMLElement;
-
-  const patchSize = debounce((size?: { width: number; height: number }) => {
-    const { width, height } = size || container.getBoundingClientRect();
-    containerSize.width = width;
-    containerSize.height = height;
-  }, 120);
-
-  patchSize();
-
-  const ob = new ResizeObserver((entries) => patchSize(entries[0]?.contentRect));
-
-  ob.observe(container);
-
-  onUnmounted(() => {
-    ob.disconnect();
-  });
-});
-
-function onZoomChange() {
-  moveableRef.value?.updateRect();
-}
-
-const canvasStyle = computed(() => ({
-  width: `${canvas.value.width}px`,
-  height: `${canvas.value.height}px`,
-  backgroundColor: canvas.value.backgroundColor,
-}));
 </script>
 
 <template>
@@ -162,12 +74,20 @@ const canvasStyle = computed(() => ({
       ref="moveableRef"
       :target="selectedTarget"
       :origin="false"
-      :draggable="true"
-      :resizable="true"
+      :draggable="!selectedNode?.locked"
+      :resizable="!selectedNode?.locked"
       @drag="onDrag"
+      @drag-start="onStart"
+      @drag-end="onEnd"
       @resize="onResize"
+      @resize-start="onStart"
+      @resize-end="onEnd"
       @drag-group="onDragGroup"
+      @drag-group-start="onStart"
+      @drag-group-end="onEnd"
       @resize-group="onResizeGroup"
+      @resize-group-start="onStart"
+      @resize-group-end="onEnd"
     />
     <Selecto
       v-if="stageRef"
@@ -186,19 +106,7 @@ const canvasStyle = computed(() => ({
       :canvas-width="canvas.width"
       :canvas-height="canvas.height"
       :lines="lines"
-      :palette="{
-        bgColor: '#1f2937',
-        longfgColor: '#6b7290',
-        fontColor: '#9ca3af',
-        fontShadowColor: '#0e8da7',
-        shadowColor: 'rgba(14, 141,167, 0.14)',
-        lineColor: '#22c55e',
-        lineType: 'solid',
-        lockLineColor: '#4b55563',
-        borderColor: '#374151',
-        hoverBg: '#111827',
-        hoverColor: '#fff',
-      }"
+      :palette="palette"
       @zoomchange="onZoomChange"
     >
       <div
@@ -209,16 +117,33 @@ const canvasStyle = computed(() => ({
         @mousedown.self="onClear"
         @drop="onDrop"
       >
-        <component
+        <el-dropdown
           v-for="(node, index) in nodes"
           :key="node.id"
-          :is="getMaterialComponent(node.type)"
-          v-bind="node.props"
-          class="canvas-node"
-          :style="getNodeStyle(node, index)"
-          :data-node-id="node.id"
-          @mousedown="onSelect($event, node)"
-        />
+          trigger="contextmenu"
+          @command="onCommand"
+        >
+          <component
+            :is="getMaterialComponent(node.type)"
+            v-bind="node.props"
+            class="canvas-node"
+            :style="getNodeStyle(node, index)"
+            :data-node-id="node.id"
+            :data-node-locked="node.locked"
+            @mousedown="onSelect($event, node)"
+          />
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="copy">复制</el-dropdown-item>
+              <el-dropdown-item command="remove">移除</el-dropdown-item>
+              <el-dropdown-item command="moveTop">置顶</el-dropdown-item>
+              <el-dropdown-item command="moveBottom">置底</el-dropdown-item>
+              <el-dropdown-item command="toggleLock">{{
+                selectedNode?.locked ? '解锁' : '锁定'
+              }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </SketchRuler>
   </div>

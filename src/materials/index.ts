@@ -1,6 +1,6 @@
 import type { Component } from 'vue';
 import type { Cagetory, CagetoryKey, InstallCtx, Material, Setter } from './types';
-import type { MaterialSchema } from '@/directive/schema/types';
+import type { MaterialSchema } from '@/schema/types';
 
 export type * from './types';
 
@@ -60,6 +60,7 @@ export function createNode(node: MaterialSchema) {
   return {
     ...node,
     [PARSED_NODE]: true,
+    locked: false,
     id: crypto.randomUUID(),
   };
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUndoRedo } from '@/directive/composables/use-undo-redo';
+import { useUndoRedo } from '@/composables/use-undo-redo';
 import { useEditorStore } from '@/stores/editor';
 
 defineOptions({

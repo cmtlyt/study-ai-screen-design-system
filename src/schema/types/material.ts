@@ -12,8 +12,9 @@ export interface MaterialSchema {
   type: string;
   name: string;
   layout: MaterialLayout;
+  locked: boolean;
   style?: Partial<CSSStyleDeclaration>;
   props: Record<string, any>;
 }
 
-export type DefineSchema = Omit<MaterialSchema, 'id'>;
+export type DefineSchema = Omit<MaterialSchema, 'id' | 'locked'>;

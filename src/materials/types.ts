@@ -1,4 +1,4 @@
-import type { DefineSchema, MaterialPositionLayout } from '@/directive/schema/types';
+import type { DefineSchema, MaterialPositionLayout } from '@/schema/types';
 import type { Component } from 'vue';
 
 export type CagetoryKey = 'chart' | 'form' | 'info';
