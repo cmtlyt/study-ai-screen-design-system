@@ -102,6 +102,15 @@ export const useEditorStore = defineStore('editor', () => {
     setValue(!node.locked, node, 'locked');
   };
 
+  const updateNode = (nodeId: string, newNode: MaterialSchema) => {
+    const index = nodes.value.findIndex((item) => item.id === nodeId);
+    if (!~index) return;
+    const newNodes = nodes.value.slice();
+    const oldNode = newNodes[index]!;
+    newNodes[index] = { ...oldNode, ...newNode, id: oldNode.id, type: oldNode.type };
+    setValue(newNodes);
+  };
+
   return {
     page,
     canvas,
@@ -121,5 +130,6 @@ export const useEditorStore = defineStore('editor', () => {
     moveTop,
     moveBottom,
     toggleLock,
+    updateNode,
   };
 });

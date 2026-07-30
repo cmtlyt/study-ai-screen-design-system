@@ -69,7 +69,7 @@ function onCommand(command: string) {
 </script>
 
 <template>
-  <div class="h-full">
+  <div class="relative h-full overflow-hidden isolate">
     <Moveable
       ref="moveableRef"
       :target="selectedTarget"

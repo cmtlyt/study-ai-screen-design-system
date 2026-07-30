@@ -61,6 +61,8 @@ export interface DefineSetter<K extends string> extends Setter {
 
 export type PositionLayoutLayoutSetters = DefineSetter<`layout.${keyof MaterialPositionLayout}`>[];
 
+export type NodeInfoSetters = DefineSetter<`name` | `locked`>[];
+
 export function defineMaterial<
   Schema extends DefineSchema,
   Setters extends DefineSetter<ComputedSchemaKeys<Schema>>[],
