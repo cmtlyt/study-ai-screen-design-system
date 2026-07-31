@@ -9,12 +9,24 @@ const canvasSchema = z.object({
 
 export type CanvasSchema = z.infer<typeof canvasSchema>;
 
-const dataSourceSchema = z.object({
-  type: z.enum(['static', 'api']),
+const staticDataSourceSchema = z.object({
+  type: z.literal('static'),
   id: z.string(),
   name: z.string(),
   data: z.any(),
 });
+
+const dataSourceSchema = z.union([
+  staticDataSourceSchema,
+  z.object({
+    ...staticDataSourceSchema.shape,
+    type: z.literal('api'),
+    url: z.string(),
+    data: z.any().optional(),
+    interval: z.number().optional(),
+    params: z.record(z.string(), z.any()).optional(),
+  }),
+]);
 
 export type DataSourceSchema = z.infer<typeof dataSourceSchema>;
 
