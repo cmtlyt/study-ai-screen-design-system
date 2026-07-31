@@ -1,30 +1,7 @@
 import { useUndoRedo } from '@/composables/use-undo-redo';
-import type { MaterialSchema, PageSchema } from '@/schema/types';
+import { pageSchema, type MaterialSchema, type PageSchema } from '@/schema/types';
 import { createNode, isParsedNode } from '@/materials';
 import { defineStore } from 'pinia';
-import { z } from 'zod';
-
-const pageSchema = z.object({
-  name: z.string().min(1),
-  canvas: z.object({
-    width: z.number().min(1),
-    height: z.number().min(1),
-    backgroundColor: z.string(),
-  }),
-  nodes: z.array(
-    z.object({
-      type: z.string(),
-      name: z.string(),
-      layout: z.object({
-        x: z.number().min(0),
-        y: z.number().min(0),
-        width: z.number().min(1),
-        height: z.number().min(1),
-      }),
-      props: z.record(z.string(), z.any()),
-    }),
-  ),
-});
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange, startBatch, commitBatch } = useUndoRedo();
@@ -43,11 +20,33 @@ export const useEditorStore = defineStore('editor', () => {
       backgroundColor: '#ffffff',
     },
     nodes: [],
+    dataSource: [
+      {
+        type: 'static',
+        id: '123',
+        name: '销售数据',
+        data: [
+          { label: '一月', value: 100 },
+          { label: '二月', value: 200 },
+          { label: '三月', value: 300 },
+        ],
+      },
+      {
+        type: 'static',
+        id: '456',
+        name: '访问数据',
+        data: [
+          { label: '一月', value: 1000 },
+          { label: '二月', value: 800 },
+          { label: '三月', value: 1100 },
+        ],
+      },
+    ],
   });
 
   const canvas = toRef(page.value, 'canvas');
-
   const nodes = toRef(page.value, 'nodes');
+  const dataSource = toRef(page.value, 'dataSource');
 
   const selectedNodeIds = ref<string[]>([]);
   const selectedNodeId = computed(() =>
@@ -157,13 +156,15 @@ export const useEditorStore = defineStore('editor', () => {
     startBatch();
     setValue(newPage.name, page.value, 'name');
     setValue(newNodes, page.value, 'nodes');
-    setValue({ ...newPage.canvas }, page.value, 'canvas');
+    setValue(newPage.canvas, page.value, 'canvas');
+    setValue(newPage.dataSource, page.value, 'dataSource');
     commitBatch();
   };
 
   return {
     page,
     canvas,
+    dataSource,
     panelVisible,
     nodes,
     selectedNodeId,

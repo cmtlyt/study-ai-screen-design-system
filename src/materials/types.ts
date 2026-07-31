@@ -1,4 +1,4 @@
-import type { DefineMaterialSchema, MaterialPositionLayout } from '@/schema/types';
+import type { DefineMaterialSchema, MaterialPositionLayoutSchema } from '@/schema/types';
 import type { ComputedDeepKeys, ComputedKeys } from '@/types';
 import type { Component } from 'vue';
 
@@ -42,7 +42,8 @@ export interface DefineSetter<K extends string> extends Setter {
   key: K;
 }
 
-export type PositionLayoutLayoutSetters = DefineSetter<`layout.${keyof MaterialPositionLayout}`>[];
+export type PositionLayoutLayoutSetters =
+  DefineSetter<`layout.${keyof MaterialPositionLayoutSchema}`>[];
 
 export type NodeInfoSetters = DefineSetter<`name` | `locked`>[];
 

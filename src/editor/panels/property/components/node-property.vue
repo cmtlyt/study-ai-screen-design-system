@@ -7,6 +7,7 @@ import {
   type PositionLayoutLayoutSetters,
 } from '@/materials';
 import FormCreater from './form-creater.vue';
+import DataSource from './data-source.vue';
 
 defineOptions({
   name: 'NodeProperty',
@@ -61,22 +62,29 @@ function onConfirmJsonChange() {
         <vue-icon icon="si:json-fill" />
       </span>
     </div>
-    <el-collapse class="collapse-panel" :model-value="['node-info', 'node-property']">
-      <el-collapse-item title="节点信息" name="node-info">
-        <FormCreater :setters="nodeInfoSetters" :form-data="selectedNode" />
-      </el-collapse-item>
-      <el-collapse-item title="布局属性" name="layout">
-        <FormCreater :setters="layoutSetters" :form-data="selectedNode" />
-      </el-collapse-item>
-      <el-collapse-item title="节点属性" name="node-property">
-        <FormCreater :setters="setters" :form-data="selectedNode" />
-      </el-collapse-item>
-    </el-collapse>
+    <el-tabs model-value="property" stretch>
+      <el-tab-pane label="属性" name="property">
+        <el-collapse class="collapse-panel" :model-value="['node-info', 'node-property']">
+          <el-collapse-item title="节点信息" name="node-info">
+            <FormCreater :setters="nodeInfoSetters" :form-data="selectedNode" />
+          </el-collapse-item>
+          <el-collapse-item title="布局属性" name="layout">
+            <FormCreater :setters="layoutSetters" :form-data="selectedNode" />
+          </el-collapse-item>
+          <el-collapse-item title="节点属性" name="node-property">
+            <FormCreater :setters="setters" :form-data="selectedNode" />
+          </el-collapse-item>
+        </el-collapse>
+      </el-tab-pane>
+      <el-tab-pane label="数据源" name="data-source">
+        <DataSource />
+      </el-tab-pane>
+    </el-tabs>
     <el-drawer
       v-model="previewJsonDrawerVisiable"
       title="JSON 编辑"
       size="800"
-      :destroy-on-close="true"
+      destroy-on-close
       @close="jsonText = ''"
     >
       <MonacoEditor v-model="jsonText" lang="json" />

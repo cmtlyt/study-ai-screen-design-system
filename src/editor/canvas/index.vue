@@ -10,6 +10,7 @@ import { useCanvasRuler } from './composables/use-canvas-ruler';
 import { useMoveable } from './composables/use-moveable';
 import { useSelection } from './composables/use-selection';
 import 'vue3-sketch-ruler/lib/style.css';
+import { DATA_SOURCE_KEY } from '@/constants/provider-key';
 
 defineOptions({
   name: 'CanvasRoot',
@@ -19,8 +20,9 @@ const moveableRef = useTemplateRef('moveableRef');
 const stageRef = useTemplateRef('stageRef');
 
 const editorStore = useEditorStore();
+const { canvas, nodes, selectedNode, dataSource } = storeToRefs(editorStore);
 
-const { canvas, nodes, selectedNode } = storeToRefs(editorStore);
+provide(DATA_SOURCE_KEY, dataSource);
 
 const { onStart, onEnd, onDrag, onResize, onDragGroup, onResizeGroup } = useMoveable({
   moveableRef,
@@ -130,6 +132,7 @@ function onCommand(command: string) {
             :style="getNodeStyle(node, index)"
             :data-node-id="node.id"
             :data-node-locked="node.locked"
+            :schema="node"
             @mousedown="onSelect($event, node)"
           />
           <template #dropdown>
