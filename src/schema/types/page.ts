@@ -22,6 +22,8 @@ const dataSourceSchema = z.union([
     ...staticDataSourceSchema.shape,
     type: z.literal('api'),
     url: z.string(),
+    method: z.enum(['GET', 'POST']),
+    readPath: z.string().optional(),
     data: z.any().optional(),
     interval: z.number().optional(),
     params: z.record(z.string(), z.any()).optional(),

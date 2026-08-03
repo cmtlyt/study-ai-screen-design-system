@@ -1,10 +1,14 @@
 <script setup lang="ts">
+import { FORM_INFO } from '@/components/form-creater/constants';
+import { formFieldPropsOption } from '@/components/form-creater/types';
+import { previewData } from '@/composables/use-data-source';
 import { useUndoRedo } from '@/composables/use-undo-redo';
 import type { Setter } from '@/materials';
 import type { DataSourceSchema } from '@/schema/types';
 import { useEditorStore } from '@/stores/editor';
 import { deepClone } from '@/utils';
 import { storeToRefs } from 'pinia';
+import MonacoEditor from '@/components/monaco-editor/index.vue';
 
 defineOptions({
   name: 'DataSourceManager',
@@ -24,6 +28,47 @@ function selecteDataSource(item: DataSourceSchema) {
   rollbackItem();
   activeDataSource.value = item;
 }
+
+const codeParser = {
+  encoder: (value: any) => JSON.stringify(value, null, 2),
+  decoder: (value: string) => JSON.parse(value),
+};
+
+const DataPreviewComp = defineComponent(
+  () => {
+    const formInfo = inject(FORM_INFO)!;
+    if (formInfo.formData.type !== 'api') {
+      return () => null;
+    }
+
+    const showDetail = ref(false);
+    const data = ref('');
+
+    const onPreview = () => {
+      previewData(formInfo.formData as DataSourceSchema).then((res: any) => {
+        data.value = JSON.stringify(res, null, 2);
+        showDetail.value = true;
+      });
+    };
+
+    return () => {
+      return h('div', { style: 'width: 100%' }, [
+        h(
+          ElButton,
+          { onClick: onPreview },
+          { default: () => (showDetail.value ? '刷新数据' : '查看详情') },
+        ),
+        showDetail.value &&
+          h(MonacoEditor, {
+            modelValue: data.value,
+            readonly: true,
+            style: 'margin-top: 8rem; height: 500px;',
+          }),
+      ]);
+    };
+  },
+  { props: formFieldPropsOption },
+);
 
 const dataSourceSetter = computed(() => {
   if (!activeDataSource.value) return [];
@@ -48,8 +93,30 @@ const dataSourceSetter = computed(() => {
     setter.push(
       ...([
         { key: 'url', label: '接口地址', type: 'input' },
+        {
+          key: 'method',
+          label: '请求方式',
+          type: 'radio',
+          props: {
+            type: 'button',
+            options: [
+              { label: 'GET', value: 'GET' },
+              { label: 'POST', value: 'POST' },
+            ],
+          },
+        },
         { key: 'interval', label: '轮询间隔', type: 'number' },
-        { key: 'params', label: '接口参数', type: 'input' },
+        {
+          key: 'readPath',
+          label: '响应路径',
+          type: 'input',
+        },
+        {
+          key: 'params',
+          label: '接口参数',
+          type: 'codeEditor',
+          props: { style: { height: '200px' }, ...codeParser },
+        },
       ] satisfies Setter[]),
     );
   }
@@ -59,9 +126,15 @@ const dataSourceSetter = computed(() => {
     type: 'codeEditor',
     props: {
       style: { height: '500px' },
-      encoder: (value: any) => JSON.stringify(value, null, 2),
-      decoder: (value: string) => JSON.parse(value),
+      ...codeParser,
     },
+  });
+  setter.push({
+    key: 'dataPreivew',
+    label: '数据预览',
+    type: 'custom',
+    'x-visiable': (data) => data.type === 'api',
+    'x-component': DataPreviewComp,
   });
   return setter;
 });
@@ -143,8 +216,8 @@ function removeDataSource(id: string) {
         />
       </div>
     </aside>
-    <main class="flex-1 p-8 overflow-x-hidden overflow-y-auto flex flex-col">
-      <div class="flex-1">
+    <main class="flex-1 p-8 overflow-hidden flex flex-col">
+      <div class="flex-1 overflow-y-auto">
         <form-creater
           v-if="activeDataSource"
           :setters="dataSourceSetter"

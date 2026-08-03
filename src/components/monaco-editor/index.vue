@@ -27,6 +27,7 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     lang?: string;
+    readonly?: boolean;
     encoder?: (value: any) => string;
     decoder?: (value: string) => any;
   }>(),
@@ -40,7 +41,9 @@ const emit = defineEmits<{
   (e: 'blur'): void;
 }>();
 
-const modelValue = defineModel<string>({ default: '' });
+type ModelType = typeof props.encoder extends (...args: any[]) => any ? any : string;
+
+const modelValue = defineModel<ModelType>({ default: '' });
 
 const editorRef = useTemplateRef('editorRef');
 
@@ -54,6 +57,7 @@ onMounted(() => {
     automaticLayout: true,
     value: props.encoder?.(modelValue.value) || modelValue.value,
     language: props.lang || 'json',
+    readOnly: props.readonly,
   });
 
   const contentChangeDisposable = instance.onDidChangeModelContent(() => {

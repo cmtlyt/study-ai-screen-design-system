@@ -5,7 +5,15 @@ import type { Component } from 'vue';
 export type CagetoryKey = 'chart' | 'form' | 'info';
 
 export type SetterType =
-  'input' | 'select' | 'color' | 'number' | 'switch' | 'checkbox' | 'radio' | 'codeEditor';
+  | 'input'
+  | 'select'
+  | 'color'
+  | 'number'
+  | 'switch'
+  | 'checkbox'
+  | 'radio'
+  | 'codeEditor'
+  | 'custom';
 
 export interface Setter {
   key: string;
@@ -13,6 +21,8 @@ export interface Setter {
   type: SetterType;
   span?: number;
   props?: Record<string, any>;
+  'x-visiable'?: (data: any, setter: Setter) => boolean;
+  'x-component'?: Component;
   [key: string]: any;
 }
 

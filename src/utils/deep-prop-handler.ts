@@ -10,6 +10,7 @@ export function getDeepProp<T extends Record<string, any>, K extends string>(
   target: T,
   key: K,
 ): DeepValue<T, K> {
+  if (!key) return target as any;
   return key.split('.').reduce((prev, curr) => (prev || {})[curr], target) as DeepValue<T, K>;
 }
 
