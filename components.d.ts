@@ -33,6 +33,7 @@ declare module 'vue' {
     ElTabPanel: typeof import('element-plus/es')['ElTabPanel']
     ElTabs: typeof import('element-plus/es')['ElTabs']
     FormCreater: typeof import('./src/components/form-creater/index.vue')['default']
+    MaterialNode: typeof import('./src/components/material-node/index.vue')['default']
     MonacoEditor: typeof import('./src/components/monaco-editor/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

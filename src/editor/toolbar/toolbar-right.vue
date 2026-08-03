@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia';
 import { isString, tryCall } from '@cmtlyt/lingshu-toolkit';
 import { ElMessage } from 'element-plus';
 import DataSourceManager from './components/data-source-manager.vue';
+import { useRouter } from 'vue-router';
 
 defineOptions({
   name: 'ToolbarRight',
@@ -88,6 +89,12 @@ const dataSourceManagerVisiable = ref(false);
 function openDataSourceManager() {
   dataSourceManagerVisiable.value = true;
 }
+
+const router = useRouter();
+
+function preivewPage() {
+  router.push('/preview');
+}
 </script>
 
 <template>
@@ -106,7 +113,7 @@ function openDataSourceManager() {
     <span class="icon" @click="openDataSourceManager">
       <vue-icon icon="material-symbols:database" />
     </span>
-    <span class="icon"><vue-icon icon="codicon:open-preview" /></span>
+    <span class="icon" @click="preivewPage"><vue-icon icon="codicon:open-preview" /></span>
     <span class="icon" @click="previewJson"><vue-icon icon="si:json-fill" /></span>
     <span class="icon"><vue-icon icon="grommet-icons:deploy" /></span>
     <el-popover ref="importPopoverRef" trigger="click" placement="bottom-end" width="326">

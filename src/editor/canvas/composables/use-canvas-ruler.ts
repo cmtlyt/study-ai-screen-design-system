@@ -1,6 +1,5 @@
-import { useEditorStore } from '@/stores/editor';
+import { useCanvasStyle } from '@/composables/use-canvas-style';
 import { debounce } from '@/utils';
-import { storeToRefs } from 'pinia';
 import type Moveable from 'vue3-moveable';
 
 interface UseCanvasRulerOptions {
@@ -9,9 +8,6 @@ interface UseCanvasRulerOptions {
 
 export function useCanvasRuler(options: UseCanvasRulerOptions) {
   const { moveableRef } = options;
-
-  const editorStore = useEditorStore();
-  const { canvas } = storeToRefs(editorStore);
 
   const lines = ref({ h: [], v: [] });
   const scale = ref(1);
@@ -32,11 +28,7 @@ export function useCanvasRuler(options: UseCanvasRulerOptions) {
     hoverColor: '#fff',
   };
 
-  const canvasStyle = computed(() => ({
-    width: `${canvas.value.width}px`,
-    height: `${canvas.value.height}px`,
-    backgroundColor: canvas.value.backgroundColor,
-  }));
+  const canvasStyle = useCanvasStyle();
 
   const onZoomChange = () => {
     moveableRef.value?.updateRect();

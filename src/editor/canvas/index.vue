@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { MaterialSchema } from '@/schema/types';
-import { createNode, getMaterialComponent } from '@/materials';
+import { createNode } from '@/materials';
 import { useEditorStore } from '@/stores/editor';
 import { storeToRefs } from 'pinia';
 import Moveable from 'vue3-moveable';
@@ -10,7 +9,7 @@ import { useCanvasRuler } from './composables/use-canvas-ruler';
 import { useMoveable } from './composables/use-moveable';
 import { useSelection } from './composables/use-selection';
 import 'vue3-sketch-ruler/lib/style.css';
-import { DATA_SOURCE_KEY } from '@/constants/provider-key';
+import { DATA_SOURCE_KEY, STAGE_SCALE_KEY } from '@/constants/provider-key';
 
 defineOptions({
   name: 'CanvasRoot',
@@ -34,17 +33,7 @@ const { palette, lines, scale, canvasStyle, containerSize, onZoomChange } = useC
   moveableRef,
 });
 
-function getNodeStyle(node: MaterialSchema, index: number) {
-  return {
-    ...node.style,
-    position: 'absolute',
-    left: `${node.layout.x}px`,
-    top: `${node.layout.y}px`,
-    width: `${node.layout.width}px`,
-    height: `${node.layout.height}px`,
-    zIndex: index + 1,
-  };
-}
+provide(STAGE_SCALE_KEY, scale);
 
 function onDrop(event: DragEvent) {
   const node = createNode(JSON.parse(event.dataTransfer?.getData('schema') || '{}'));
@@ -125,15 +114,10 @@ function onCommand(command: string) {
           trigger="contextmenu"
           @command="onCommand"
         >
-          <component
-            :is="getMaterialComponent(node.type)"
-            v-bind="node.props"
-            class="canvas-node"
-            :style="getNodeStyle(node, index)"
-            :data-node-id="node.id"
-            :data-node-locked="node.locked"
-            :schema="node"
-            @mousedown="onSelect($event, node)"
+          <material-node
+            :node="node"
+            :index="index"
+            @select="($event, node) => onSelect($event, node)"
           />
           <template #dropdown>
             <el-dropdown-menu>
