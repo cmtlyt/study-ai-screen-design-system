@@ -3,6 +3,7 @@ import { pageSchema, type MaterialSchema, type PageSchema } from '@/schema/types
 import { createNode, isParsedNode } from '@/materials';
 import { defineStore } from 'pinia';
 import { deepClone } from '@/utils';
+import { EDITOR_TEMP_ID } from '@/constants/editor';
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange, startBatch, commitBatch } = useUndoRedo();
@@ -14,6 +15,7 @@ export const useEditorStore = defineStore('editor', () => {
   });
 
   const page = ref<PageSchema>({
+    id: EDITOR_TEMP_ID as any,
     name: '未命名画布',
     canvas: {
       width: 1920,
@@ -175,6 +177,16 @@ export const useEditorStore = defineStore('editor', () => {
     commitBatch();
   };
 
+  const updatePageId = (newId: string) => {
+    page.value.id = newId;
+  };
+
+  const initPage = (newPage: PageSchema) => {
+    const result = pageSchema.safeParse(newPage);
+    if (!result.success) return result.error;
+    Object.assign(page.value, result.data);
+  };
+
   return {
     page,
     canvas,
@@ -197,5 +209,7 @@ export const useEditorStore = defineStore('editor', () => {
     toggleLock,
     updateNode,
     updatePage,
+    updatePageId,
+    initPage,
   };
 });

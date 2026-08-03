@@ -12,6 +12,7 @@ declare global {
   const ElColorPicker: typeof import('element-plus/es').ElColorPicker
   const ElInput: typeof import('element-plus/es').ElInput
   const ElInputNumber: typeof import('element-plus/es').ElInputNumber
+  const ElMessage: typeof import('element-plus/es').ElMessage
   const ElRadioGroup: typeof import('element-plus/es').ElRadioGroup
   const ElSelect: typeof import('element-plus/es').ElSelect
   const ElSwitch: typeof import('element-plus/es').ElSwitch

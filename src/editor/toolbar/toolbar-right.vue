@@ -6,6 +6,7 @@ import { isString, tryCall } from '@cmtlyt/lingshu-toolkit';
 import { ElMessage } from 'element-plus';
 import DataSourceManager from './components/data-source-manager.vue';
 import { useRouter } from 'vue-router';
+import { publishScreen } from '@/utils';
 
 defineOptions({
   name: 'ToolbarRight',
@@ -95,6 +96,12 @@ const router = useRouter();
 function preivewPage() {
   router.push('/preview');
 }
+
+async function publish() {
+  const id = await publishScreen(page.value);
+  editorStore.updatePageId(id);
+  router.push({ path: '/screen', query: { id } });
+}
 </script>
 
 <template>
@@ -115,7 +122,7 @@ function preivewPage() {
     </span>
     <span class="icon" @click="preivewPage"><vue-icon icon="codicon:open-preview" /></span>
     <span class="icon" @click="previewJson"><vue-icon icon="si:json-fill" /></span>
-    <span class="icon"><vue-icon icon="grommet-icons:deploy" /></span>
+    <span class="icon" @click="publish"><vue-icon icon="grommet-icons:deploy" /></span>
     <el-popover ref="importPopoverRef" trigger="click" placement="bottom-end" width="326">
       <template #reference>
         <span class="icon" @click="onImport"><vue-icon icon="solar:import-bold" /></span>

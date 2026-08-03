@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getMaterialComponent } from '@/materials';
 import type { MaterialSchema } from '@/schema/types';
-import { getNodeStyle } from '@/utils/get-node-style';
+import { getNodeStyle } from '@/utils';
 
 defineOptions({
   name: 'MaterialNode',

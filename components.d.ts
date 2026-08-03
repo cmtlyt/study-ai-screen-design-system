@@ -37,6 +37,7 @@ declare module 'vue' {
     MonacoEditor: typeof import('./src/components/monaco-editor/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    ScreenRender: typeof import('./src/components/screen-render/index.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

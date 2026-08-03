@@ -6,12 +6,36 @@ import MaterialPanel from './panels/material/index.vue';
 import LayerPanel from './panels/layer/index.vue';
 import CanvasRoot from './canvas/index.vue';
 import PropertyPanel from './panels/property/index.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { getPublishedScreen } from '@/utils/publish.ts';
+import { storeToRefs } from 'pinia';
 
 defineOptions({
   name: 'ScreenEditor',
 });
 
-const { page, panelVisible } = useEditorStore();
+const editorStore = useEditorStore();
+const { page, panelVisible } = storeToRefs(editorStore);
+const router = useRouter();
+const route = useRoute();
+
+onMounted(async () => {
+  const pageId = route.query.id as string;
+  if (pageId) {
+    const publishedScreen = await getPublishedScreen(pageId);
+    if (!publishedScreen) {
+      console.error('画布不存在');
+      ElMessage.error({
+        message: '画布不存在, 创建新画布',
+        onClose() {
+          router.replace('/editor');
+        },
+      });
+      return;
+    }
+    editorStore.initPage(publishedScreen);
+  }
+});
 </script>
 
 <template>
