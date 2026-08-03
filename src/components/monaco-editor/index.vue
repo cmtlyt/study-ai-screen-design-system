@@ -28,11 +28,17 @@ const props = withDefaults(
   defineProps<{
     lang?: string;
     readonly?: boolean;
+    disableWatch?: boolean;
     encoder?: (value: any) => string;
     decoder?: (value: string) => any;
   }>(),
   {
     lang: 'json',
+    readonly: false,
+    disableWatch: false,
+    encoder: (v: any) => v,
+    //! 不允许设置 decoder 的默认值, 因为 lazy change 是否启用依赖 decoder 是否存在
+    decoder: undefined,
   },
 );
 
@@ -41,21 +47,21 @@ const emit = defineEmits<{
   (e: 'blur'): void;
 }>();
 
-type ModelType = typeof props.encoder extends (...args: any[]) => any ? any : string;
-
-const modelValue = defineModel<ModelType>({ default: '' });
+const modelValue = defineModel<any>({ default: '' });
 
 const editorRef = useTemplateRef('editorRef');
 
 onMounted(() => {
   if (!editorRef.value) return;
 
+  let changed = false;
+
   const instance = editor.create(editorRef.value, {
     theme: 'vs-dark',
     tabSize: 2,
     // 自适应宽高
     automaticLayout: true,
-    value: props.encoder?.(modelValue.value) || modelValue.value,
+    value: props.encoder(modelValue.value),
     language: props.lang || 'json',
     readOnly: props.readonly,
   });
@@ -65,6 +71,7 @@ onMounted(() => {
       const content = instance.getValue();
       modelValue.value = content;
     }
+    changed = true;
   });
 
   const focusDisposable = instance.onDidFocusEditorText(() => {
@@ -72,19 +79,25 @@ onMounted(() => {
   });
 
   const blurDisposable = instance.onDidBlurEditorText(() => {
-    if (props.decoder) {
-      const content = props.decoder(instance.getValue());
-      modelValue.value = content;
+    const content = instance.getValue();
+    if (changed) {
+      if (props.decoder) {
+        const data = props.decoder(content);
+        modelValue.value = data;
+      }
     }
     emit('blur');
   });
 
-  const modelValueChangeDisposable = watch(modelValue, () => {
-    instance.setValue(props.encoder?.(modelValue.value) || modelValue.value);
-  });
+  if (!props.disableWatch) {
+    watch(modelValue, (newValue) => {
+      const content = props.encoder(newValue);
+      instance.setValue(content);
+      changed = false;
+    });
+  }
 
   onUnmounted(() => {
-    modelValueChangeDisposable.stop();
     contentChangeDisposable.dispose();
     focusDisposable.dispose();
     blurDisposable.dispose();

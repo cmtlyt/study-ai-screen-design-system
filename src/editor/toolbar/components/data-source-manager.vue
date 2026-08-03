@@ -14,6 +14,10 @@ defineOptions({
   name: 'DataSourceManager',
 });
 
+const props = defineProps<{
+  activeId?: string;
+}>();
+
 const emit = defineEmits<{
   (event: 'close'): void;
 }>();
@@ -24,10 +28,40 @@ const { dataSource } = storeToRefs(editorStore);
 const dataSourceBuffer = ref(deepClone(dataSource.value));
 const activeDataSource = ref<DataSourceSchema>();
 
+const filterText = ref('');
+
+const filteredDataSource = computed(() => {
+  if (!filterText.value) return dataSourceBuffer.value;
+  return dataSourceBuffer.value.filter((item) => item.name.includes(filterText.value));
+});
+
 function selecteDataSource(item: DataSourceSchema) {
   rollbackItem();
   activeDataSource.value = item;
 }
+
+const asideRef = useTemplateRef('asideRef');
+
+function scrollActiveSource() {
+  nextTick(() => {
+    if (!activeDataSource.value || !asideRef.value) return;
+    const activeEl = asideRef.value.querySelector(
+      `[data-source-id="${activeDataSource.value.id}"]`,
+    );
+    activeEl?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+}
+
+onMounted(() => {
+  const activeData = props.activeId
+    ? dataSourceBuffer.value.find((item) => item.id === props.activeId)
+    : dataSourceBuffer.value[0];
+
+  if (activeData) {
+    selecteDataSource(activeData);
+    scrollActiveSource();
+  }
+});
 
 const codeParser = {
   encoder: (value: any) => JSON.stringify(value, null, 2),
@@ -189,6 +223,7 @@ function removeDataSource(id: string) {
 <template>
   <div class="flex h-[70vh] overflow-hidden gap-8 border-border border-t">
     <aside
+      ref="asideRef"
       :class="[
         ['flex-[0_0_auto]', 'flex', 'flex-col', 'items-center', 'justify-start'],
         ['w-[30%]', 'p-8', 'gap-8', 'pl-0'],
@@ -197,13 +232,15 @@ function removeDataSource(id: string) {
       ]"
     >
       <div
-        class="sticky top-0 flex justify-end w-full flex-[0_0_auto] bg-(--el-dialog-bg-color) shadow-[0_-8rem_0_0_var(--el-dialog-bg-color)]"
+        class="sticky top-0 flex justify-between gap-8 w-full flex-[0_0_auto] bg-(--el-dialog-bg-color) shadow-[0_-8rem_0_0_var(--el-dialog-bg-color)]"
       >
-        <el-button type="text" @click="onAdd">新增数据源</el-button>
+        <el-input v-model="filterText" type="search" placeholder="输入数据源名称" />
+        <el-button type="text" @click="onAdd">新增</el-button>
       </div>
       <div
-        v-for="item in dataSourceBuffer"
+        v-for="item in filteredDataSource"
         :key="item.id"
+        :data-source-id="item.id"
         class="h-40 w-full flex-[0_0_auto] flex items-center justify-between border-border border rounded-[8rem] px-8 transition-all"
         :class="{ active: item.id === activeDataSource?.id }"
         @click="selecteDataSource(item)"

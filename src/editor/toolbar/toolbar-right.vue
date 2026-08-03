@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MaterialSchema } from '@/schema/types';
+import type { MaterialSchema, PageSchema } from '@/schema/types';
 import { useEditorStore } from '@/stores/editor';
 import { storeToRefs } from 'pinia';
 import { isString, tryCall } from '@cmtlyt/lingshu-toolkit';
@@ -14,25 +14,25 @@ const editorStore = useEditorStore();
 const { page } = storeToRefs(editorStore);
 
 const editorJsonVisiable = ref(false);
-const jsonText = ref('');
+const pageJson = ref<PageSchema>();
 
 function previewJson() {
   editorJsonVisiable.value = true;
-  jsonText.value = JSON.stringify(page.value, null, 2);
+  pageJson.value = page.value;
 }
 
-function onConfirmJsonChange(json?: string | Event) {
-  if (!isString(json)) {
-    json = jsonText.value;
-  }
-  if (!json) return;
+function onConfirmJsonChange(_: Event | null, json?: string | PageSchema) {
+  if (!json && !pageJson.value) return;
+  json ||= pageJson.value;
+
   const newPage = tryCall(
-    () => JSON.parse(json),
+    () => (isString(json) ? JSON.parse(json) : json),
     () => {},
   );
   if (!newPage) return ElMessage.error('JSON 格式错误');
   const error = editorStore.updatePage(newPage);
   if (error) return ElMessage.error(error.message);
+  ElMessage.success('更新成功');
   editorJsonVisiable.value = false;
 }
 
@@ -55,7 +55,7 @@ function onExport() {
 const importPopoverRef = useTemplateRef('importPopoverRef');
 
 function importPage(json: string) {
-  onConfirmJsonChange(json);
+  onConfirmJsonChange(null, json);
   importPopoverRef.value?.hide();
   window.removeEventListener('paste', pasteHandler);
   ElMessage.success('导入成功');
@@ -129,9 +129,14 @@ function openDataSourceManager() {
       title="编辑 JSON"
       size="800"
       :destroy-on-close="true"
-      @close="jsonText = ''"
+      @close="pageJson = undefined"
     >
-      <monaco-editor v-model="jsonText" lang="json" />
+      <monaco-editor
+        v-model="pageJson"
+        lang="json"
+        :encoder="(value: any) => JSON.stringify(value, null, 2)"
+        :decoder="JSON.parse"
+      />
       <template #footer>
         <el-button @click="editorJsonVisiable = false">取消</el-button>
         <el-button type="primary" @click="onConfirmJsonChange">确认</el-button>

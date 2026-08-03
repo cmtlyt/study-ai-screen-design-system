@@ -17,7 +17,7 @@ let chart: EChartsType | null = null;
 
 const dataId = toRef(props, 'dataId');
 
-const { data } = useDataSource(dataId);
+const { data, loading, error } = useDataSource(dataId);
 
 const option = computed(() => ({
   ...props.option,
@@ -49,5 +49,8 @@ watch(option, () => chart?.setOption(option.value), { deep: true });
 </script>
 
 <template>
-  <div ref="chartRef"></div>
+  <div v-if="error" class="size-full text-red-500 text-[24rem]">
+    {{ error.message }}
+  </div>
+  <div v-else v-loading="loading" ref="chartRef"></div>
 </template>

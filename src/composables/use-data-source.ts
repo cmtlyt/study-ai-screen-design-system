@@ -5,7 +5,9 @@ import { createApi, defineApi } from '@cmtlyt/lingshu-toolkit';
 
 const API_CONFIG = Symbol('API_CONFIG');
 
-const pageSearch = new URLSearchParams(location.search).toString();
+const pageSearch = new URLSearchParams(location.search);
+const pageSearchString = pageSearch.toString();
+const pageSearchObj = Object.fromEntries(pageSearch);
 
 const loadDataApi = createApi(
   defineApi({
@@ -18,15 +20,15 @@ const loadDataApi = createApi(
         const newUrl = new URL(apiConfig.url, config.baseUrl);
         if (isGetRequest) {
           const requestSearch = new URLSearchParams(otherData).toString();
-          newUrl.search = `${requestSearch}&${pageSearch}`;
+          newUrl.search = `${requestSearch}&${pageSearchString}`;
         }
         const newRequest = new Request(newUrl, {
           ...req,
           method: apiConfig.method || req.method,
-          body: isGetRequest ? undefined : JSON.stringify(otherData),
+          body: isGetRequest ? undefined : JSON.stringify({ ...pageSearchObj, ...otherData }),
         });
         // 启用的话删除 console 放开 return 就好了
-        console.debug('request forward', newRequest);
+        console.debug('request forward debug', newRequest);
         // return newRequest;
       }
       // mock
@@ -51,6 +53,8 @@ const loadDataApi = createApi(
   { baseUrl: '/' },
 );
 
+const requestCache = new Map<string, Promise<any>>();
+
 export function useDataSource(dataId: Ref<string | undefined>) {
   const dataSource = inject(DATA_SOURCE_KEY)!;
 
@@ -59,6 +63,8 @@ export function useDataSource(dataId: Ref<string | undefined>) {
   );
 
   const data = ref();
+  const loading = ref(false);
+  const error = ref();
 
   let timer: number;
 
@@ -66,22 +72,39 @@ export function useDataSource(dataId: Ref<string | undefined>) {
     if (!source.value) return;
     if (source.value.type === 'api') {
       const { interval, data: fullbackData, params, ...config } = source.value;
-      return loadDataApi({ [API_CONFIG]: config, ...params }).then(
-        (res: any) => {
-          data.value = res;
+      const sourceId = source.value.id;
+
+      loading.value = true;
+
+      const request =
+        requestCache.get(sourceId) ||
+        loadDataApi({ [API_CONFIG]: config, ...params }).finally(() => {
+          requestCache.delete(sourceId);
+        });
+
+      requestCache.set(sourceId, request);
+
+      return request
+        .then(
+          (res: any) => {
+            data.value = res;
+          },
+          (err: any) => {
+            if (!fullbackData) {
+              error.value = err;
+              return;
+            }
+            data.value = fullbackData;
+            return fullbackData;
+          },
+        )
+        .finally(() => {
           timer && clearTimeout(timer);
           if (interval) {
             timer = setTimeout(loadData, interval);
           }
-        },
-        (error: any) => {
-          if (!fullbackData) {
-            throw error;
-          }
-          data.value = fullbackData;
-          return fullbackData;
-        },
-      );
+          loading.value = false;
+        });
     } else {
       data.value = source.value.data;
     }
@@ -93,7 +116,7 @@ export function useDataSource(dataId: Ref<string | undefined>) {
     clearTimeout(timer);
   });
 
-  return { data };
+  return { data, loading, error, refresh: loadData };
 }
 
 export function previewData(dataSourceItem: DataSourceSchema) {

@@ -41,7 +41,10 @@ const componentMap: Record<SetterType, Component> = {
   color: ElColorPicker,
   checkbox: ElCheckbox,
   radio: ElRadioGroup,
-  codeEditor: MonacoEditor,
+  codeEditor: (props) => {
+    // console.debug(123, props);
+    return h(MonacoEditor, { ...props });
+  },
   custom: (props) => h(props.setter['x-component'] as Component, { ...props }),
 };
 
@@ -60,6 +63,7 @@ function onBlur() {
 }
 
 function onChange(value: any, setter: Setter) {
+  console.debug('onChange');
   if (props.ignoreHistory) {
     setDeepProp(props.formData, setter.key, value);
     return;
