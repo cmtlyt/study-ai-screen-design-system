@@ -8,6 +8,7 @@ interface ChangeRecord {
 }
 
 const stack: ChangeRecord[][] = Array.from({ length: 50 });
+window.historyStack = stack;
 const windowInfo = { start: 0, end: 0 };
 const currentIdx = ref(0);
 

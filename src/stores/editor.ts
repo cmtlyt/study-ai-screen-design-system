@@ -2,6 +2,7 @@ import { useUndoRedo } from '@/composables/use-undo-redo';
 import { pageSchema, type MaterialSchema, type PageSchema } from '@/schema/types';
 import { createNode, isParsedNode } from '@/materials';
 import { defineStore } from 'pinia';
+import { deepClone } from '@/utils';
 
 export const useEditorStore = defineStore('editor', () => {
   const { applyChange, startBatch, commitBatch } = useUndoRedo();
@@ -99,7 +100,7 @@ export const useEditorStore = defineStore('editor', () => {
   };
 
   const copyNode = (node: MaterialSchema) => {
-    const newNode = createNode(JSON.parse(JSON.stringify(node)));
+    const newNode = createNode(deepClone(node));
     newNode.layout.x += 20;
     newNode.layout.y += 20;
     addNode(newNode);

@@ -5,9 +5,3 @@ import ScreenEditor from '@/editor/index.vue';
 <template>
   <ScreenEditor />
 </template>
-
-<style scoped lang="scss">
-.title {
-  color: yellowgreen;
-}
-</style>

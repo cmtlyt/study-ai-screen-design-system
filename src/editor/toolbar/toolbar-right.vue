@@ -4,6 +4,7 @@ import { useEditorStore } from '@/stores/editor';
 import { storeToRefs } from 'pinia';
 import { isString, tryCall } from '@cmtlyt/lingshu-toolkit';
 import { ElMessage } from 'element-plus';
+import DataSourceManager from './components/data-source-manager.vue';
 
 defineOptions({
   name: 'ToolbarRight',
@@ -81,6 +82,12 @@ function onFileChange(event: Event) {
   if (!file) return;
   file.text().then(importPage);
 }
+
+const dataSourceManagerVisiable = ref(false);
+
+function openDataSourceManager() {
+  dataSourceManagerVisiable.value = true;
+}
 </script>
 
 <template>
@@ -96,6 +103,9 @@ function onFileChange(event: Event) {
       ],
     ]"
   >
+    <span class="icon" @click="openDataSourceManager">
+      <vue-icon icon="material-symbols:database" />
+    </span>
     <span class="icon"><vue-icon icon="codicon:open-preview" /></span>
     <span class="icon" @click="previewJson"><vue-icon icon="si:json-fill" /></span>
     <span class="icon"><vue-icon icon="grommet-icons:deploy" /></span>
@@ -127,5 +137,9 @@ function onFileChange(event: Event) {
         <el-button type="primary" @click="onConfirmJsonChange">确认</el-button>
       </template>
     </el-drawer>
+
+    <el-dialog v-model="dataSourceManagerVisiable" title="数据源配置" width="800" destroy-on-close>
+      <DataSourceManager @close="dataSourceManagerVisiable = false" />
+    </el-dialog>
   </div>
 </template>

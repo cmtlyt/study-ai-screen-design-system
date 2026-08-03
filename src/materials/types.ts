@@ -4,7 +4,8 @@ import type { Component } from 'vue';
 
 export type CagetoryKey = 'chart' | 'form' | 'info';
 
-export type SetterType = 'input' | 'select' | 'color' | 'number' | 'switch' | 'checkbox';
+export type SetterType =
+  'input' | 'select' | 'color' | 'number' | 'switch' | 'checkbox' | 'radio' | 'codeEditor';
 
 export interface Setter {
   key: string;

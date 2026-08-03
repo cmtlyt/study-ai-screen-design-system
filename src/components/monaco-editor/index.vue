@@ -27,11 +27,18 @@ defineOptions({
 const props = withDefaults(
   defineProps<{
     lang?: string;
+    encoder?: (value: any) => string;
+    decoder?: (value: string) => any;
   }>(),
   {
     lang: 'json',
   },
 );
+
+const emit = defineEmits<{
+  (e: 'focus'): void;
+  (e: 'blur'): void;
+}>();
 
 const modelValue = defineModel<string>({ default: '' });
 
@@ -45,16 +52,38 @@ onMounted(() => {
     tabSize: 2,
     // 自适应宽高
     automaticLayout: true,
-    value: modelValue.value,
+    value: props.encoder?.(modelValue.value) || modelValue.value,
     language: props.lang || 'json',
   });
 
   const contentChangeDisposable = instance.onDidChangeModelContent(() => {
-    modelValue.value = instance.getValue();
+    if (!props.decoder) {
+      const content = instance.getValue();
+      modelValue.value = content;
+    }
+  });
+
+  const focusDisposable = instance.onDidFocusEditorText(() => {
+    emit('focus');
+  });
+
+  const blurDisposable = instance.onDidBlurEditorText(() => {
+    if (props.decoder) {
+      const content = props.decoder(instance.getValue());
+      modelValue.value = content;
+    }
+    emit('blur');
+  });
+
+  const modelValueChangeDisposable = watch(modelValue, () => {
+    instance.setValue(props.encoder?.(modelValue.value) || modelValue.value);
   });
 
   onUnmounted(() => {
+    modelValueChangeDisposable.stop();
     contentChangeDisposable.dispose();
+    focusDisposable.dispose();
+    blurDisposable.dispose();
     instance.dispose();
   });
 });
