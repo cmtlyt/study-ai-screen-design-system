@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { useUndoRedo } from '@/composables/use-undo-redo';
 import type { Setter } from '@/materials';
-import type { MaterialEvent } from '@/schema/types';
+import type { MaterialEvent, MaterialSchema } from '@/schema/types';
 import { useEditorStore } from '@/stores/editor';
 import { deepClone } from '@/utils';
 import { storeToRefs } from 'pinia';
+import type Monaco from 'monaco-editor';
+import { CUSTOM_FUNCTION_TEMPLATE, EVENT_FUNCTION_TEMPLATE } from '@/constants/event-template';
+import { getRuntimeDeclare } from '@/runtime/context';
 
 defineOptions({
   name: 'NodeEvents',
@@ -15,7 +18,7 @@ const emit = defineEmits<{
 }>();
 
 const editorStore = useEditorStore();
-const { selectedNode } = storeToRefs(editorStore);
+const { nodes, selectedNode } = storeToRefs(editorStore);
 
 const eventsBuffer = ref(deepClone(selectedNode.value?.events || []));
 const activeEvent = ref<MaterialEvent>();
@@ -32,8 +35,43 @@ function selecteEvent(item: MaterialEvent) {
   activeEvent.value = item;
 }
 
+function getMonacoHooks(nodes: MaterialSchema[], eventType: 'event' | 'custom') {
+  let oldLibs: any;
+  let originalCompilerOptions: any;
+
+  return {
+    onCreateInstanceBefore: (monaco: typeof Monaco) => {
+      oldLibs = monaco.typescript.javascriptDefaults.getExtraLibs();
+      originalCompilerOptions = monaco.typescript.javascriptDefaults.getCompilerOptions();
+
+      const runtimeDeclare = getRuntimeDeclare(nodes, eventType);
+
+      monaco.typescript.javascriptDefaults.setExtraLibs([
+        { content: runtimeDeclare, filePath: 'file:///runtime-declare.d.ts' },
+      ]);
+      monaco.typescript.javascriptDefaults.setCompilerOptions({
+        ...originalCompilerOptions,
+        target: monaco.typescript.ScriptTarget.ESNext,
+        allowJs: true,
+        checkJs: false,
+      });
+    },
+    onUnmounted: (monaco: typeof Monaco) => {
+      monaco.typescript.javascriptDefaults.setExtraLibs(oldLibs);
+      monaco.typescript.javascriptDefaults.setCompilerOptions(originalCompilerOptions);
+    },
+  };
+}
+
+const hooks = computed(() => {
+  return getMonacoHooks(nodes.value, activeEvent.value?.type === 'custom' ? 'custom' : 'event');
+});
+
+const codeEditorRef = ref();
+
 const eventsSetter = computed(() => {
   if (!activeEvent.value) return [];
+
   const setter: Setter[] = [
     { key: 'name', label: '名称', type: 'input' },
     { key: 'desc', label: '事件描述', type: 'input' },
@@ -49,17 +87,25 @@ const eventsSetter = computed(() => {
       },
       'x-onChange': (value: string, formData: MaterialEvent) => {
         if (value === 'click') {
-          formData.code = `function main($context, $node, $event) {\n}`;
+          formData.code = EVENT_FUNCTION_TEMPLATE;
         } else if (value === 'custom') {
-          formData.code = 'function main($context, $node, ...args) {\n}';
+          formData.code = CUSTOM_FUNCTION_TEMPLATE;
         }
+        // 重新创建实例, 让 hooks 重走一遍去更新类型信息
+        nextTick(() => codeEditorRef.value[0].reLoad());
       },
     },
     {
       key: 'code',
       label: '代码',
       type: 'codeEditor',
-      props: { style: { height: '500px' }, decoder: (v: any) => v, lang: 'javascript' },
+      props: {
+        ref: codeEditorRef,
+        style: { height: '500px' },
+        decoder: (v: any) => v,
+        lang: 'javascript',
+        hooks,
+      },
     },
   ];
   return setter;
@@ -99,7 +145,7 @@ function onAdd() {
   eventsBuffer.value.push({
     name: `fn_${Date.now()}`,
     type: 'click',
-    code: 'function main(event, $context, $node) {\n}',
+    code: EVENT_FUNCTION_TEMPLATE,
   });
   selecteEvent(eventsBuffer.value.at(-1)!);
 }

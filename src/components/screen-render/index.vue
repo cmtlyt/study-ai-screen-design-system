@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { useCanvasStyle } from '@/composables/use-canvas-style';
-import { DATA_SOURCE_KEY, RUNTIME_CONTEXT_KEY, STAGE_SCALE_KEY } from '@/constants/provider-key';
-import { createRuntimeContext } from '@/runtime/context';
+import {
+  DATA_SOURCE_KEY,
+  RUNTIME_UTILS_KEY,
+  RUNTIME_CONTEXT_KEY,
+  STAGE_SCALE_KEY,
+} from '@/constants/provider-key';
+import { createRuntimeContext, getNodeDispatcherMap, getNodeMap } from '@/runtime/context';
 import type { PageSchema } from '@/schema/types';
 import { debounce, getDeepProp } from '@/utils';
 
@@ -23,6 +28,11 @@ const context = createRuntimeContext(runtimePage);
 
 // @ts-expect-error window is global
 window.$context = context;
+
+provide(RUNTIME_UTILS_KEY, {
+  nodeMap: getNodeMap(nodes.value),
+  dispatcher: getNodeDispatcherMap(nodes.value, context),
+});
 
 provide(RUNTIME_CONTEXT_KEY, context);
 

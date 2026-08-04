@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { RUNTIME_CONTEXT_KEY } from '@/constants/provider-key';
+import { RUNTIME_UTILS_KEY, RUNTIME_CONTEXT_KEY } from '@/constants/provider-key';
 import { getMaterialComponent } from '@/materials';
+import { createHandlerParams, createHandlers } from '@/runtime/context';
 import type { MaterialSchema } from '@/schema/types';
 import { getNodeStyle } from '@/utils';
 
@@ -12,34 +13,30 @@ const emit = defineEmits<{
   (event: 'select', $event: MouseEvent, node: MaterialSchema): void;
 }>();
 
-defineProps<{
+const props = defineProps<{
   node: MaterialSchema;
   index: number;
+  editMode?: boolean;
 }>();
 
 const nodeRef = useTemplateRef('nodeRef');
 
 function createEvents(node: MaterialSchema) {
+  if (props.editMode) return {};
+
   const { events } = node;
   if (!events?.length) return {};
 
   const context = inject(RUNTIME_CONTEXT_KEY);
+  const utils = inject(RUNTIME_UTILS_KEY)! || {};
   if (!context) return {};
 
   return events.reduce(
     (prev, curr) => {
-      const handler = new Function(
-        '$context',
-        '$node',
-        '...args',
-        `${curr.code}\nreturn typeof main === 'function' ? main($context, $node, ...args) : undefined;`,
-      );
-      prev[curr.type] = (event: Event) => {
-        return Reflect.apply(handler, null, [context, node, event]);
-      };
-      curr.handler = (...args) => {
-        return Reflect.apply(handler, null, [context, node, ...args]);
-      };
+      const $$ctx = createHandlerParams(context, node, utils);
+      const { eventHandler, handler } = createHandlers(curr, $$ctx);
+      prev[curr.type] = eventHandler;
+      curr.handler = handler;
       return prev;
     },
     {} as Record<string, any>,

@@ -41,10 +41,7 @@ const componentMap: Record<SetterType, Component> = {
   color: ElColorPicker,
   checkbox: ElCheckbox,
   radio: ElRadioGroup,
-  codeEditor: (props) => {
-    // console.debug(123, props);
-    return h(MonacoEditor, { ...props });
-  },
+  codeEditor: MonacoEditor,
   custom: (props) => h(props.setter['x-component'] as Component, { ...props }),
 };
 

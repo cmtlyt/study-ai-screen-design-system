@@ -117,6 +117,7 @@ function onCommand(command: string) {
           <material-node
             :node="node"
             :index="index"
+            edit-mode
             @select="($event, node) => onSelect($event, node)"
           />
           <template #dropdown>
