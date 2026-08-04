@@ -16,9 +16,9 @@ const textMaterial = defineMaterial({
     },
     style: {
       color: '#000',
+      fontSize: '16px',
     },
     props: {
-      size: 16,
       content: '文本',
     },
   },
@@ -30,10 +30,17 @@ const textMaterial = defineMaterial({
       span: 8,
     },
     {
-      key: 'props.size',
+      key: 'style.fontSize',
       label: '字体大小',
       type: 'number',
       span: 16,
+      props: {
+        min: 1,
+      },
+      'x-parser': {
+        encoder: (value: string) => (value ? parseInt(value, 10) : 1),
+        decoder: (value: number) => (value ? `${value}px` : '1px'),
+      },
     },
     {
       key: 'props.content',

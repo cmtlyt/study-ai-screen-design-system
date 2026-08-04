@@ -17,7 +17,7 @@ let chart: EChartsType | null = null;
 
 const dataId = toRef(props, 'dataId');
 
-const { data, loading, error } = useDataSource(dataId);
+const { data, loading, error, refresh } = useDataSource(dataId);
 
 const option = computed(() => ({
   ...props.option,
@@ -46,6 +46,10 @@ onMounted(() => {
 });
 
 watch(option, () => chart?.setOption(option.value), { deep: true });
+
+defineExpose({
+  refresh,
+});
 </script>
 
 <template>

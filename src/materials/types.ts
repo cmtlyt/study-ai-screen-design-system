@@ -15,6 +15,11 @@ export type SetterType =
   | 'codeEditor'
   | 'custom';
 
+export interface SetterParser<T = any> {
+  encoder: (value: T) => any;
+  decoder: (value: any) => T;
+}
+
 export interface Setter {
   key: string;
   label: string;
@@ -23,6 +28,7 @@ export interface Setter {
   props?: Record<string, any>;
   'x-visiable'?: (data: any, setter: Setter) => boolean;
   'x-component'?: Component;
+  'x-parser'?: SetterParser;
   [key: string]: any;
 }
 

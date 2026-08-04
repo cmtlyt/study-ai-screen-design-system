@@ -20,7 +20,7 @@ const loadDataApi = createApi(
         const newUrl = new URL(apiConfig.url, config.baseUrl);
         if (isGetRequest) {
           const requestSearch = new URLSearchParams(otherData).toString();
-          newUrl.search = `${requestSearch}&${pageSearchString}`;
+          newUrl.search = `${pageSearchString}&${requestSearch}`;
         }
         const newRequest = new Request(newUrl, {
           ...req,
@@ -68,7 +68,8 @@ export function useDataSource(dataId: Ref<string | undefined>) {
 
   let timer: number;
 
-  const loadData = async () => {
+  const loadData = async (uParams?: Record<string, any>) => {
+    console.debug(uParams);
     if (!source.value) return;
     if (source.value.type === 'api') {
       const { interval, data: fullbackData, params, ...config } = source.value;
@@ -78,7 +79,7 @@ export function useDataSource(dataId: Ref<string | undefined>) {
 
       const request =
         requestCache.get(sourceId) ||
-        loadDataApi({ [API_CONFIG]: config, ...params }).finally(() => {
+        loadDataApi({ [API_CONFIG]: config, ...params, ...uParams }).finally(() => {
           requestCache.delete(sourceId);
         });
 
@@ -101,7 +102,7 @@ export function useDataSource(dataId: Ref<string | undefined>) {
         .finally(() => {
           timer && clearTimeout(timer);
           if (interval) {
-            timer = setTimeout(loadData, interval);
+            timer = setTimeout(() => loadData(), interval);
           }
           loading.value = false;
         });
@@ -110,7 +111,7 @@ export function useDataSource(dataId: Ref<string | undefined>) {
     }
   };
 
-  watch(source, loadData, { immediate: true });
+  watch(source, () => loadData(), { immediate: true });
 
   onBeforeUnmount(() => {
     clearTimeout(timer);

@@ -15,10 +15,17 @@ defineProps<{
   node: MaterialSchema;
   index: number;
 }>();
+
+const nodeRef = useTemplateRef('nodeRef');
+
+defineExpose({
+  nodeRef,
+});
 </script>
 
 <template>
   <component
+    ref="nodeRef"
     :is="getMaterialComponent(node.type)"
     v-bind="node.props"
     class="canvas-node"

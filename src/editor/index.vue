@@ -24,7 +24,6 @@ onMounted(async () => {
   if (pageId) {
     const publishedScreen = await getPublishedScreen(pageId);
     if (!publishedScreen) {
-      console.error('画布不存在');
       ElMessage.error({
         message: '画布不存在, 创建新画布',
         onClose() {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useUndoRedo } from '@/composables/use-undo-redo';
-import type { Setter, SetterType } from '@/materials';
+import type { Setter, SetterParser, SetterType } from '@/materials';
 import { getDeepProp, setDeepProp } from '@/utils';
 import MonacoEditor from '../monaco-editor/index.vue';
 import { FORM_INFO } from './constants.ts';
@@ -62,8 +62,12 @@ function onBlur() {
   }
 }
 
+function parser(setter: Setter, handler: keyof SetterParser, data: any) {
+  return setter['x-parser']?.[handler]?.(data) || data;
+}
+
 function onChange(value: any, setter: Setter) {
-  console.debug('onChange');
+  value = parser(setter, 'decoder', value);
   if (props.ignoreHistory) {
     setDeepProp(props.formData, setter.key, value);
     return;
@@ -91,7 +95,7 @@ function onChange(value: any, setter: Setter) {
               :is="componentMap[setter.type]"
               v-bind="setter.props"
               :setter="setter"
-              :model-value="getDeepProp(formData, setter.key)"
+              :model-value="parser(setter, 'encoder', getDeepProp(formData, setter.key))"
               @focus="onFocus"
               @blur="onBlur"
               @update:model-value="onChange($event, setter)"

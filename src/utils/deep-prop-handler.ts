@@ -21,6 +21,6 @@ export function setDeepProp<T extends Record<string, any>, K extends string>(
 ) {
   const keys = key.split('.');
   const lastKey = keys.pop()!;
-  const lastObj = keys.reduce((prev, curr) => prev[curr], target) as any;
+  const lastObj = keys.reduce((prev, curr) => ((prev as any)[curr] ||= {}), target) as any;
   lastObj[lastKey] = value;
 }
