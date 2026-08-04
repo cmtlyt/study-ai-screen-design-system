@@ -12,6 +12,7 @@ export interface RuntimeContext {
   registerNodeInstance(id: string, instance: Record<string, any>): void;
   trigger: (id: string, event: string, ...args: any[]) => any;
   refreshNodesByDataId(dataId: string, ...args: any[]): void;
+  dispatch(id: string, eventName: string, ...args: any[]): any;
 }
 
 export function createRuntimeContext(page: Ref<PageSchema>): RuntimeContext {
@@ -53,6 +54,15 @@ export function createRuntimeContext(page: Ref<PageSchema>): RuntimeContext {
     });
   };
 
+  const dispatch: RuntimeContext['dispatch'] = (id, eventName, ...args) => {
+    const node = getNode(id);
+    if (!node) return;
+    if (!node.events) return console.warn('node events not found');
+    const event = node.events.find((item) => item.name === eventName);
+    if (!event || !event.handler) return console.warn('event not found');
+    return Reflect.apply(event.handler, null, args);
+  };
+
   return {
     getNode,
     setAttribute,
@@ -61,5 +71,6 @@ export function createRuntimeContext(page: Ref<PageSchema>): RuntimeContext {
     registerNodeInstance,
     trigger,
     refreshNodesByDataId,
+    dispatch,
   };
 }

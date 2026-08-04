@@ -29,6 +29,7 @@ export interface Setter {
   'x-visiable'?: (data: any, setter: Setter) => boolean;
   'x-component'?: Component;
   'x-parser'?: SetterParser;
+  'x-onChange'?: (value: any, formData: any) => void;
   [key: string]: any;
 }
 

@@ -26,9 +26,7 @@ const textMaterial = defineMaterial({
       {
         type: 'click',
         name: 'fn',
-        code: `
-          $context.refreshNodesByDataId('789')
-        `,
+        code: `function main($context, $node, event) {\n  $context.refreshNodesByDataId('789');\n}`,
       },
     ],
   },

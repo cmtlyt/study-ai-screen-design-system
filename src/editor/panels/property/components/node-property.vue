@@ -8,6 +8,7 @@ import {
 } from '@/materials';
 import FormCreater from './form-creater.vue';
 import DataSource from './data-source.vue';
+import NodeEvents from './node-events.vue';
 
 defineOptions({
   name: 'NodeProperty',
@@ -52,15 +53,38 @@ function onConfirmJsonChange() {
   editorStore.updateNode(selectedNode.value.id, newNode);
   previewJsonDrawerVisiable.value = false;
 }
+
+const nodeEventManagerVisiable = ref(false);
+
+function editEvents() {
+  if (!selectedNode.value) return;
+  nodeEventManagerVisiable.value = true;
+}
 </script>
 
 <template>
   <div v-if="selectedNode">
     <div class="border-border border-b py-8 pb-16 font-semibold flex items-center justify-between">
       <span>当前节点: {{ selectedNode.name }}</span>
-      <span class="border rounded-[4px] border-border p-4 cursor-pointer" @click="previewJson">
-        <vue-icon icon="si:json-fill" />
-      </span>
+      <div
+        class="flex items-center gap-8"
+        :class="[
+          [
+            '[&>span]:border',
+            '[&>span]:rounded-[4px]',
+            '[&>span]:border-border',
+            '[&>span]:p-4',
+            '[&>span]:cursor-pointer',
+          ],
+        ]"
+      >
+        <span @click="editEvents">
+          <vue-icon icon="tabler:function" />
+        </span>
+        <span @click="previewJson">
+          <vue-icon icon="si:json-fill" />
+        </span>
+      </div>
     </div>
     <el-tabs model-value="property" stretch>
       <el-tab-pane label="属性" name="property">
@@ -93,6 +117,9 @@ function onConfirmJsonChange() {
         <el-button type="primary" @click="onConfirmJsonChange">确认</el-button>
       </template>
     </el-drawer>
+    <el-dialog v-model="nodeEventManagerVisiable" title="事件配置" width="800" destroy-on-close>
+      <NodeEvents @close="nodeEventManagerVisiable = false" />
+    </el-dialog>
   </div>
 </template>
 

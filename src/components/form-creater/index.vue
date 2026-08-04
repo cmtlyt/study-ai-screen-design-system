@@ -68,6 +68,9 @@ function parser(setter: Setter, handler: keyof SetterParser, data: any) {
 
 function onChange(value: any, setter: Setter) {
   value = parser(setter, 'decoder', value);
+
+  setter['x-onChange']?.(value, formInfo.formData);
+
   if (props.ignoreHistory) {
     setDeepProp(props.formData, setter.key, value);
     return;

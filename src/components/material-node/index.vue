@@ -28,14 +28,18 @@ function createEvents(node: MaterialSchema) {
 
   return events.reduce(
     (prev, curr) => {
+      const handler = new Function(
+        '$context',
+        '$node',
+        '...args',
+        `${curr.code}\nreturn typeof main === 'function' ? main($context, $node, ...args) : undefined;`,
+      );
       prev[curr.type] = (event: Event) => {
-        return Reflect.apply(
-          new Function('event', '$context', '$node', `"use strict";return (${curr.code})`),
-          null,
-          [event, context, node],
-        );
+        return Reflect.apply(handler, null, [context, node, event]);
       };
-
+      curr.handler = (...args) => {
+        return Reflect.apply(handler, null, [context, node, ...args]);
+      };
       return prev;
     },
     {} as Record<string, any>,

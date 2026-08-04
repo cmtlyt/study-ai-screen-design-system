@@ -16,7 +16,9 @@ export type MaterialLayoutSchema = z.infer<typeof materialLayoutSchema>;
 export const materialEvent = z.object({
   type: z.string().describe('事件类型'),
   name: z.string().describe('事件名称'),
+  desc: z.string().describe('事件描述').optional(),
   code: z.string().describe('事件代码'),
+  handler: z.function().optional(),
 });
 
 export type MaterialEvent = z.infer<typeof materialEvent>;
