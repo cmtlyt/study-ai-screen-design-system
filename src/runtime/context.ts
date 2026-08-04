@@ -4,7 +4,7 @@ import { isFunction } from '@cmtlyt/lingshu-toolkit';
 
 type SetHandler = (id: string, key: string, value: any) => void;
 
-interface RuntimeContext {
+export interface RuntimeContext {
   getNode(id: string): MaterialSchema | undefined;
   setAttribute: SetHandler;
   setProp: SetHandler;

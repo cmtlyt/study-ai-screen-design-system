@@ -100,7 +100,7 @@ function preivewPage() {
 async function publish() {
   const id = await publishScreen(page.value);
   editorStore.updatePageId(id);
-  router.push({ path: '/screen', query: { id } });
+  window.open(`/screen?id=${id}`, '_blank');
 }
 </script>
 

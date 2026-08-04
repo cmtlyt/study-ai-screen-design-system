@@ -13,6 +13,14 @@ export const materialLayoutSchema = z.union([materialPositionLayoutSchema]);
 
 export type MaterialLayoutSchema = z.infer<typeof materialLayoutSchema>;
 
+export const materialEvent = z.object({
+  type: z.string().describe('事件类型'),
+  name: z.string().describe('事件名称'),
+  code: z.string().describe('事件代码'),
+});
+
+export type MaterialEvent = z.infer<typeof materialEvent>;
+
 export const materialSchema = z.object({
   id: z.string(),
   type: z.string(),
@@ -25,6 +33,7 @@ export const materialSchema = z.object({
       dataId: z.string().optional(),
     })
     .loose(),
+  events: z.array(materialEvent).optional(),
 });
 
 export type MaterialSchema = z.infer<typeof materialSchema>;

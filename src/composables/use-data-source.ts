@@ -69,7 +69,6 @@ export function useDataSource(dataId: Ref<string | undefined>) {
   let timer: number;
 
   const loadData = async (uParams?: Record<string, any>) => {
-    console.debug(uParams);
     if (!source.value) return;
     if (source.value.type === 'api') {
       const { interval, data: fullbackData, params, ...config } = source.value;

@@ -21,6 +21,16 @@ const textMaterial = defineMaterial({
     props: {
       content: '文本',
     },
+    events: [
+      //
+      {
+        type: 'click',
+        name: 'fn',
+        code: `
+          $context.refreshNodesByDataId('789')
+        `,
+      },
+    ],
   },
   setters: [
     {
