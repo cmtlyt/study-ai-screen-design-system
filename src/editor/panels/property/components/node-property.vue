@@ -117,7 +117,7 @@ function editEvents() {
         <el-button type="primary" @click="onConfirmJsonChange">确认</el-button>
       </template>
     </el-drawer>
-    <el-dialog v-model="nodeEventManagerVisiable" title="事件配置" width="800" destroy-on-close>
+    <el-dialog v-model="nodeEventManagerVisiable" title="事件配置" width="1200" destroy-on-close>
       <NodeEvents @close="nodeEventManagerVisiable = false" />
     </el-dialog>
   </div>

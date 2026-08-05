@@ -1,4 +1,3 @@
-import type { RuntimeUtils } from '@/constants/provider-key';
 import {
   materialSchema,
   type MaterialEvent,
@@ -7,9 +6,16 @@ import {
 } from '@/schema/types';
 import { setDeepProp } from '@/utils';
 import { schemaToInterface } from '@/utils/zod-utils';
+import type { Sandbox } from '@/workers/sandbox';
+import type { WorkerExecDispatcher } from '@/workers/sandbox/types';
 import { isFunction } from '@cmtlyt/lingshu-toolkit';
 
 type SetHandler = (id: string, key: string, value: any) => void;
+
+export interface RuntimeUtils {
+  nodeIdMap: Record<string, string>;
+  dispatcher: Record<string, (...args: any[]) => any>;
+}
 
 export interface RuntimeContext {
   getNode(id: string): MaterialSchema | undefined;
@@ -22,7 +28,7 @@ export interface RuntimeContext {
   dispatch(id: string, eventName: string, ...args: any[]): any;
 }
 
-export function getNodeMap(nodes: MaterialSchema[]) {
+export function getNodeIdMap(nodes: MaterialSchema[]) {
   if (!nodes) return {};
   const nameCounter = new Map<string, number>();
   return nodes.reduce(
@@ -68,14 +74,16 @@ export function getNodeDispatcherMap(nodes: MaterialSchema[], ctx: RuntimeContex
   );
 }
 
+export const EVENT_FUNCTION_TEMPLATE = `/** @param $api {API} */\nfunction main($api) {\n}`;
+
+export const CUSTOM_FUNCTION_TEMPLATE = `/** @param $api {API} */\nfunction main($api) {\n}`;
+
 export function getRuntimeDeclare(nodes: MaterialSchema[], eventType: 'event' | 'custom') {
   const dispatcherKeys = getNodeDispatcherKeys(nodes);
-  return `interface INodeIdMap {\n${Object.entries(getNodeMap(nodes))
+  return `interface INodeIdMap {\n${Object.entries(getNodeIdMap(nodes))
     .map(([key, value]) => `  [${JSON.stringify(key)}]: ${JSON.stringify(value)};`)
     .join('\n')}\n};\n
 ${schemaToInterface(materialSchema, 'MaterialSchema')}\n
-type INodeDispatcherMap = Record<${dispatcherKeys.length ? `${dispatcherKeys.join(' | ')}` : 'never'}, (...args: any[]) => any>;\n
-type INode = MaterialSchema;\n
 type SetHandler = (id: string, key: string, value: any) => void;\n
 interface IContext {
   getNode(id: string): MaterialSchema | undefined;
@@ -87,41 +95,66 @@ interface IContext {
   refreshNodesByDataId(dataId: string, ...args: any[]): void;
   dispatch(id: string, eventName: string, ...args: any[]): any;
 }\n
+type IExecEventNames = keyof IContext | ${dispatcherKeys.length ? `${dispatcherKeys.join(' | ')}` : 'never'}
 interface CTX {
-  $context: IContext;
-  $node: INode;
-  $nodeIdMap: INodeIdMap;
-  $dispatcher: INodeDispatcherMap;
-  ${eventType === 'event' ? '$event: Event;' : '$args: any[];'}
+  node: MaterialSchema;
+  nodeIdMap: INodeIdMap;
+  ${eventType === 'event' ? 'event: Event;' : 'args: any[];'}
 }\n
-declare type Main = (ctx: CTX) => any;`;
+type IExecMap = {
+  [K in keyof IContext]: (...args: Parameters<IContext[K]>) => Promise<Awaited<ReturnType<IContext[K]>>>;
+} & Record<IExecEventNames, (...args: any[]) => Promise<any>>;\n
+interface API {
+  exec: IExecMap;
+  getCurrContext: () => CTX;
+  patchContext(callback: (draft: CTX) => Promise<void> | void): Promise<void>;
+  getHostCurrContext: () => Promise<CTX>;
+}`;
 }
 
-export function createHandlerParams(
-  context: RuntimeContext,
-  node: MaterialSchema,
-  utils: RuntimeUtils,
-) {
+export function createHandlerParams(node: MaterialSchema, utils: RuntimeUtils): HandlerContext {
   return {
-    $context: context,
-    $node: node,
-    $nodeMap: utils?.nodeMap || {},
-    $dispatcher: utils?.dispatcher || {},
+    node: node,
+    nodeIdMap: utils?.nodeIdMap || {},
   };
 }
 
-export function createHandlers(event: MaterialEvent, $$ctx: Record<string, any>) {
-  const handler = new Function(
-    '$$ctx',
-    `${event.code}\nreturn typeof main === 'function' ? main($$ctx) : undefined;`,
-  );
+export function createDispatcher(
+  context: RuntimeContext,
+  utils: RuntimeUtils,
+): WorkerExecDispatcher {
+  return (event, ...args) => {
+    if (Reflect.has(context, event)) {
+      return Reflect.apply(Reflect.get(context, event), null, args);
+    }
+    if (Reflect.has(utils.dispatcher, event)) {
+      return Reflect.apply(Reflect.get(utils.dispatcher, event), null, args);
+    }
+  };
+}
+
+interface HandlerContext {
+  node: MaterialSchema;
+  nodeIdMap: Record<string, string>;
+}
+
+interface CreateHandlersOptions {
+  event: MaterialEvent;
+  context: HandlerContext;
+  sandbox: Sandbox;
+  dispatcher: WorkerExecDispatcher;
+}
+
+export function createHandlers(options: CreateHandlersOptions) {
+  const { event, context, sandbox, dispatcher } = options;
+  const { code } = event;
 
   return {
     eventHandler: (event: Event) => {
-      return Reflect.apply(handler, null, [{ ...$$ctx, $event: event }]);
+      return sandbox.exec(code, JSON.parse(JSON.stringify({ ...context, event })), dispatcher);
     },
     handler: (...args: any[]) => {
-      return Reflect.apply(handler, null, [{ ...$$ctx, $args: args }]);
+      return sandbox.exec(code, JSON.parse(JSON.stringify({ ...context, args })), dispatcher);
     },
   };
 }

@@ -6,8 +6,11 @@ import { useEditorStore } from '@/stores/editor';
 import { deepClone } from '@/utils';
 import { storeToRefs } from 'pinia';
 import type Monaco from 'monaco-editor';
-import { CUSTOM_FUNCTION_TEMPLATE, EVENT_FUNCTION_TEMPLATE } from '@/constants/event-template';
-import { getRuntimeDeclare } from '@/runtime/context';
+import {
+  getRuntimeDeclare,
+  CUSTOM_FUNCTION_TEMPLATE,
+  EVENT_FUNCTION_TEMPLATE,
+} from '@/runtime/context';
 
 defineOptions({
   name: 'NodeEvents',

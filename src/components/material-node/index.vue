@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { RUNTIME_UTILS_KEY, RUNTIME_CONTEXT_KEY } from '@/constants/provider-key';
+import { RUNTIME_UTILS_KEY, RUNTIME_CONTEXT_KEY, RUNTIME_SANDBOX } from '@/constants/provider-key';
 import { getMaterialComponent } from '@/materials';
-import { createHandlerParams, createHandlers } from '@/runtime/context';
+import { createDispatcher, createHandlerParams, createHandlers } from '@/runtime/context';
 import type { MaterialSchema } from '@/schema/types';
 import { getNodeStyle } from '@/utils';
 
@@ -29,12 +29,19 @@ function createEvents(node: MaterialSchema) {
 
   const context = inject(RUNTIME_CONTEXT_KEY);
   const utils = inject(RUNTIME_UTILS_KEY)! || {};
+  const { sandbox } = inject(RUNTIME_SANDBOX)! || {};
   if (!context) return {};
 
   return events.reduce(
     (prev, curr) => {
-      const $$ctx = createHandlerParams(context, node, utils);
-      const { eventHandler, handler } = createHandlers(curr, $$ctx);
+      const handlerContext = createHandlerParams(node, utils);
+      const dispatcher = createDispatcher(context, utils);
+      const { eventHandler, handler } = createHandlers({
+        event: curr,
+        context: handlerContext,
+        sandbox,
+        dispatcher,
+      });
       prev[curr.type] = eventHandler;
       curr.handler = handler;
       return prev;

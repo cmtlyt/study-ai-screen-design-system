@@ -5,10 +5,12 @@ import {
   RUNTIME_UTILS_KEY,
   RUNTIME_CONTEXT_KEY,
   STAGE_SCALE_KEY,
+  RUNTIME_SANDBOX,
 } from '@/constants/provider-key';
-import { createRuntimeContext, getNodeDispatcherMap, getNodeMap } from '@/runtime/context';
+import { createRuntimeContext, getNodeDispatcherMap, getNodeIdMap } from '@/runtime/context';
 import type { PageSchema } from '@/schema/types';
 import { debounce, getDeepProp } from '@/utils';
+import { createSandbox } from '@/workers/sandbox';
 
 defineOptions({
   name: 'ScreenPender',
@@ -25,12 +27,14 @@ const nodes = computed(() => runtimePage.value.nodes);
 const dataSource = computed(() => runtimePage.value.dataSource);
 
 const context = createRuntimeContext(runtimePage);
+const sandbox = createSandbox();
 
 // @ts-expect-error window is global
 window.$context = context;
 
+provide(RUNTIME_SANDBOX, { sandbox });
 provide(RUNTIME_UTILS_KEY, {
-  nodeMap: getNodeMap(nodes.value),
+  nodeIdMap: getNodeIdMap(nodes.value),
   dispatcher: getNodeDispatcherMap(nodes.value, context),
 });
 
