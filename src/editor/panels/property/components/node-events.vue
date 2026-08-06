@@ -6,11 +6,8 @@ import { useEditorStore } from '@/stores/editor';
 import { deepClone } from '@/utils';
 import { storeToRefs } from 'pinia';
 import type Monaco from 'monaco-editor';
-import {
-  getRuntimeDeclare,
-  CUSTOM_FUNCTION_TEMPLATE,
-  EVENT_FUNCTION_TEMPLATE,
-} from '@/runtime/context';
+import { getRuntimeDeclare, FUNCTION_TEMPLATE } from '@/runtime/context';
+import { getMaterialEventOptions } from '../../../../materials';
 
 defineOptions({
   name: 'NodeEvents',
@@ -38,7 +35,7 @@ function selecteEvent(item: MaterialEvent) {
   activeEvent.value = item;
 }
 
-function getMonacoHooks(nodes: MaterialSchema[], eventType: 'event' | 'custom') {
+function getMonacoHooks(nodes: MaterialSchema[]) {
   let oldLibs: any;
   let originalCompilerOptions: any;
 
@@ -47,7 +44,7 @@ function getMonacoHooks(nodes: MaterialSchema[], eventType: 'event' | 'custom') 
       oldLibs = monaco.typescript.javascriptDefaults.getExtraLibs();
       originalCompilerOptions = monaco.typescript.javascriptDefaults.getCompilerOptions();
 
-      const runtimeDeclare = getRuntimeDeclare(nodes, eventType);
+      const runtimeDeclare = getRuntimeDeclare(nodes);
 
       monaco.typescript.javascriptDefaults.setExtraLibs([
         { content: runtimeDeclare, filePath: 'file:///runtime-declare.d.ts' },
@@ -67,10 +64,25 @@ function getMonacoHooks(nodes: MaterialSchema[], eventType: 'event' | 'custom') 
 }
 
 const hooks = computed(() => {
-  return getMonacoHooks(nodes.value, activeEvent.value?.type === 'custom' ? 'custom' : 'event');
+  return getMonacoHooks(nodes.value);
 });
 
-const codeEditorRef = ref();
+const baseEvents = [
+  { label: '自定义', value: 'custom' },
+  { label: '点击', value: 'click' },
+  { label: '组件加载', value: 'vnodeMounted' },
+];
+
+const eventTypeOptions = computed(() => {
+  const nodeEvents = getMaterialEventOptions(selectedNode.value?.type || '')?.slice() || [];
+  const allEvents = [...nodeEvents, ...baseEvents];
+  const eventSet = new Set<string>();
+  return allEvents.filter((item) => {
+    const isDuplicate = eventSet.has(item.value);
+    eventSet.add(item.value);
+    return !isDuplicate;
+  });
+});
 
 const eventsSetter = computed(() => {
   if (!activeEvent.value) return [];
@@ -83,19 +95,9 @@ const eventsSetter = computed(() => {
       label: '类型',
       type: 'select',
       props: {
-        options: [
-          { label: '点击', value: 'click' },
-          { label: '自定义', value: 'custom' },
-        ],
-      },
-      'x-onChange': (value: string, formData: MaterialEvent) => {
-        if (value === 'click') {
-          formData.code = EVENT_FUNCTION_TEMPLATE;
-        } else if (value === 'custom') {
-          formData.code = CUSTOM_FUNCTION_TEMPLATE;
-        }
-        // 重新创建实例, 让 hooks 重走一遍去更新类型信息
-        nextTick(() => codeEditorRef.value[0].reLoad());
+        options: eventTypeOptions.value,
+        allowCreate: true,
+        filterable: true,
       },
     },
     {
@@ -103,9 +105,8 @@ const eventsSetter = computed(() => {
       label: '代码',
       type: 'codeEditor',
       props: {
-        ref: codeEditorRef,
         style: { height: '500px' },
-        decoder: (v: any) => v,
+        lazy: true,
         lang: 'javascript',
         hooks,
       },
@@ -147,8 +148,8 @@ function onSave() {
 function onAdd() {
   eventsBuffer.value.push({
     name: `fn_${Date.now()}`,
-    type: 'click',
-    code: EVENT_FUNCTION_TEMPLATE,
+    type: 'custom',
+    code: FUNCTION_TEMPLATE,
   });
   selecteEvent(eventsBuffer.value.at(-1)!);
 }

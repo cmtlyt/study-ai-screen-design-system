@@ -32,21 +32,22 @@ export function getMaterialsByCagetory(cagetory: CagetoryKey) {
   return materials.filter((item) => item.cagetory === cagetory);
 }
 
-const componentMap = new Map<MaterialSchema['type'], Component>();
+const materialMap = new Map<MaterialSchema['type'], { material: Material; component: Component }>();
 
 export function getMaterialComponent(_type: MaterialSchema['type']) {
-  return componentMap.get(_type);
+  return materialMap.get(_type)?.component;
 }
 
-const settersMap = new Map<MaterialSchema['type'], Setter[]>();
-
 export function getMaterialSetters(_type: MaterialSchema['type']) {
-  return settersMap.get(_type);
+  return materialMap.get(_type)?.material.setters;
+}
+
+export function getMaterialEventOptions(_type: MaterialSchema['type']) {
+  return materialMap.get(_type)?.material.eventOptions;
 }
 
 const register: InstallCtx['register'] = (material, component) => {
-  componentMap.set(material.schema.type, component);
-  settersMap.set(material.schema.type, material.setters);
+  materialMap.set(material.schema.type, { material, component });
   materials.push(material);
 };
 

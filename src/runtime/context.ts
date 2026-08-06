@@ -8,7 +8,7 @@ import { setDeepProp } from '@/utils';
 import { schemaToInterface } from '@/utils/zod-utils';
 import type { Sandbox } from '@/workers/sandbox';
 import type { WorkerExecDispatcher } from '@/workers/sandbox/types';
-import { isFunction } from '@cmtlyt/lingshu-toolkit';
+import { isFunction, isUndef, tryCallFunc } from '@cmtlyt/lingshu-toolkit';
 
 type SetHandler = (id: string, key: string, value: any) => void;
 
@@ -74,11 +74,9 @@ export function getNodeDispatcherMap(nodes: MaterialSchema[], ctx: RuntimeContex
   );
 }
 
-export const EVENT_FUNCTION_TEMPLATE = `/** @param $api {API} */\nfunction main($api) {\n}`;
+export const FUNCTION_TEMPLATE = `/** @param $api {API} */\nasync function main($api) {\n}`;
 
-export const CUSTOM_FUNCTION_TEMPLATE = `/** @param $api {API} */\nfunction main($api) {\n}`;
-
-export function getRuntimeDeclare(nodes: MaterialSchema[], eventType: 'event' | 'custom') {
+export function getRuntimeDeclare(nodes: MaterialSchema[]) {
   const dispatcherKeys = getNodeDispatcherKeys(nodes);
   return `interface INodeIdMap {\n${Object.entries(getNodeIdMap(nodes))
     .map(([key, value]) => `  [${JSON.stringify(key)}]: ${JSON.stringify(value)};`)
@@ -99,7 +97,7 @@ type IExecEventNames = keyof IContext | ${dispatcherKeys.length ? `${dispatcherK
 interface CTX {
   node: MaterialSchema;
   nodeIdMap: INodeIdMap;
-  ${eventType === 'event' ? 'event: Event;' : 'args: any[];'}
+  args: any[];
 }\n
 type IExecMap = {
   [K in keyof IContext]: (...args: Parameters<IContext[K]>) => Promise<Awaited<ReturnType<IContext[K]>>>;
@@ -145,17 +143,27 @@ interface CreateHandlersOptions {
   dispatcher: WorkerExecDispatcher;
 }
 
-export function createHandlers(options: CreateHandlersOptions) {
+const safeStringify = tryCallFunc(
+  <T>(context: T): T => JSON.parse(JSON.stringify(context)),
+  console.warn,
+);
+
+function parseWorkerContext(context: HandlerContext, args: any[]) {
+  const workerContext = safeStringify(context) || {};
+  (workerContext as any).args = args.map((item) => {
+    const newItem = safeStringify(item);
+    if (isUndef(newItem)) console.warn('arg:', item, '->', newItem);
+    return newItem;
+  });
+  return workerContext;
+}
+
+export function createEventHandler(options: CreateHandlersOptions) {
   const { event, context, sandbox, dispatcher } = options;
   const { code } = event;
 
-  return {
-    eventHandler: (event: Event) => {
-      return sandbox.exec(code, JSON.parse(JSON.stringify({ ...context, event })), dispatcher);
-    },
-    handler: (...args: any[]) => {
-      return sandbox.exec(code, JSON.parse(JSON.stringify({ ...context, args })), dispatcher);
-    },
+  return (...args: any[]) => {
+    return sandbox.exec(code, parseWorkerContext(context, args), dispatcher);
   };
 }
 

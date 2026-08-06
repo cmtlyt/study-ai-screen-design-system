@@ -33,12 +33,18 @@ export interface Setter {
   [key: string]: any;
 }
 
+export interface EventOption {
+  label: string;
+  value: string;
+}
+
 export interface Material {
   name: string;
   icon: string;
   cagetory: CagetoryKey;
   schema: DefineMaterialSchema;
   setters: Setter[];
+  eventOptions: EventOption[];
 }
 
 export interface Cagetory {
@@ -68,6 +74,11 @@ export type NodeInfoSetters = DefineSetter<`name` | `locked`>[];
 export function defineMaterial<
   Schema extends DefineMaterialSchema,
   Setters extends DefineSetter<ComputedSchemaKeys<Schema>>[],
->(material: Material & { schema: Schema } & { setters: Setters }): Material {
-  return material;
+>(
+  material: Omit<Material, 'eventOptions'> & { schema: Schema } & { setters: Setters } & {
+    eventOptions?: EventOption[];
+  },
+): Material {
+  material.eventOptions ||= [];
+  return material as Material;
 }

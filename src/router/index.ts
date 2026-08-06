@@ -7,7 +7,6 @@ const router = createRouter({
     { path: '/editor', component: () => import('@/pages/editor/index.vue') },
     { path: '/preview', component: () => import('@/pages/preview/index.vue') },
     { path: '/screen', component: () => import('@/pages/screen/index.vue') },
-    { path: '/test', component: () => import('@/pages/test/index.vue') },
   ],
 });
 
