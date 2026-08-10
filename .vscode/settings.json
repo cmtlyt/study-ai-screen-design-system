@@ -1,0 +1,10 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "js/ts.experimental.useTsgo": false,
+  "tailwindCSS.rootFontSize": 1
+}
