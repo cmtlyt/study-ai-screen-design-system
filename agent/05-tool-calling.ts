@@ -2,8 +2,6 @@ import { tool } from '@langchain/core/tools';
 import { createModel } from './utils/create-model';
 import z from 'zod';
 
-const { chatModel, messages } = createModel('');
-
 function getWeather({ city }: { city: string }) {
   return `${city} 今天晴, 气温 26 度`;
 }
@@ -16,7 +14,7 @@ const getWeatherTool = tool(getWeather, {
   }),
 });
 
-const modelWithTools = chatModel.bindTools([getWeatherTool]);
+const { chatModel: modelWithTools, messages } = createModel('', [getWeatherTool]);
 
 messages.push({ role: 'user', content: '今天北京天气如何' });
 
