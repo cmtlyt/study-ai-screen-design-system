@@ -26,7 +26,7 @@ if (result.tool_calls) {
   const toolCall = result.tool_calls[0];
   const toolResult = await getWeatherTool.invoke(toolCall);
   console.debug(toolResult);
-  messages.push({ role: 'tool', content: toolResult.content, tool_call_id: toolCall.id });
+  messages.push({ role: 'tool', content: (toolResult as any).content, tool_call_id: toolCall.id });
   const newResult = await modelWithTools.invoke(messages);
   console.debug(newResult);
 }

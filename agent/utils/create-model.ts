@@ -1,5 +1,6 @@
 import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import { BaseMessageLike } from '@langchain/core/messages';
+import { Runnable } from '@langchain/core/runnables';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { ChatOpenAI, ChatOpenAICallOptions } from '@langchain/openai';
 import { config } from 'dotenv';
@@ -10,12 +11,15 @@ config({
   override: true,
 });
 
-export function createModel(systemPrompt: string, toolList: DynamicStructuredTool[] = []) {
+export function createModel<T extends DynamicStructuredTool[] | undefined = undefined>(
+  systemPrompt: string,
+  toolList?: T,
+) {
   const messages: BaseLanguageModelInput = systemPrompt
     ? [{ role: 'system', content: systemPrompt }]
     : [];
 
-  const chatModel = new ChatOpenAI({
+  let chatModel = new ChatOpenAI({
     model: env.AI_MODEL,
     configuration: {
       baseURL: env.AI_BASE_URL,
@@ -26,7 +30,11 @@ export function createModel(systemPrompt: string, toolList: DynamicStructuredToo
         enable_thinking: false,
       },
     },
-  }).bindTools(toolList || []);
+  });
+
+  if (toolList) {
+    chatModel = chatModel.bindTools(toolList) as any;
+  }
 
   const sendMessage = async (message: BaseMessageLike, options?: ChatOpenAICallOptions) => {
     messages.push(message);
@@ -40,7 +48,7 @@ export function createModel(systemPrompt: string, toolList: DynamicStructuredToo
   };
 
   const findToolByName = (name: string) => {
-    return toolList.find((tool) => tool.name === name);
+    return toolList?.find((tool) => tool.name === name);
   };
 
   const invokeTool = async (toolCall: { id?: string; name: string; args: any }) => {
@@ -53,5 +61,12 @@ export function createModel(systemPrompt: string, toolList: DynamicStructuredToo
     return result;
   };
 
-  return { messages, chatModel, sendMessage, sendUserMessage, findToolByName, invokeTool };
+  return {
+    messages,
+    chatModel: chatModel as T extends undefined ? ChatOpenAI : Runnable,
+    sendMessage,
+    sendUserMessage,
+    findToolByName,
+    invokeTool,
+  };
 }
