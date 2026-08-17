@@ -11,14 +11,9 @@ config({
   override: true,
 });
 
-export function createModel<T extends DynamicStructuredTool[] | undefined = undefined>(
-  systemPrompt: string,
+export function createModelOnly<T extends DynamicStructuredTool[] | undefined = undefined>(
   toolList?: T,
-) {
-  const messages: BaseLanguageModelInput = systemPrompt
-    ? [{ role: 'system', content: systemPrompt }]
-    : [];
-
+): T extends undefined ? ChatOpenAI : Runnable {
   let chatModel = new ChatOpenAI({
     model: env.AI_MODEL,
     configuration: {
@@ -35,6 +30,19 @@ export function createModel<T extends DynamicStructuredTool[] | undefined = unde
   if (toolList) {
     chatModel = chatModel.bindTools(toolList) as any;
   }
+
+  return chatModel;
+}
+
+export function createModel<T extends DynamicStructuredTool[] | undefined = undefined>(
+  systemPrompt: string,
+  toolList?: T,
+) {
+  const messages: BaseLanguageModelInput = systemPrompt
+    ? [{ role: 'system', content: systemPrompt }]
+    : [];
+
+  const chatModel = createModelOnly(toolList);
 
   const sendMessage = async (message: BaseMessageLike, options?: ChatOpenAICallOptions) => {
     messages.push(message);
