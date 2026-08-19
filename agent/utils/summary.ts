@@ -8,9 +8,12 @@ config({
   override: true,
 });
 
-const SYSTEM_PROMPT = readFileSync(new URL('../../prompts/symmary.md', import.meta.url), 'utf-8');
+export const SUMMARY_SYSTEM_PROMPT = readFileSync(
+  new URL('../../prompts/symmary.md', import.meta.url),
+  'utf-8',
+);
 
-const symmaryModel = new ChatOpenAI({
+export const symmaryModel = new ChatOpenAI({
   model: env.AI_MODEL,
   configuration: {
     baseURL: env.AI_BASE_URL,
@@ -35,7 +38,7 @@ export async function symmaryMessages(
   const oldMessages = messages.splice(0, symmaryCount);
 
   const result = await symmaryModel.invoke([
-    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'system', content: SUMMARY_SYSTEM_PROMPT },
     { role: 'user', content: JSON.stringify(oldMessages) },
   ]);
 
