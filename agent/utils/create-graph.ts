@@ -6,9 +6,14 @@ type State<T> = { [K in keyof T]: z.infer<T[K]> };
 function createBuilder<
   T extends Record<string, any>,
   N extends Record<string, StateSchema<T>['Node']> = Record<string, StateSchema<T>['Node']>,
->(schema: T, nodeMap: N) {
+>(schema: T, nodeMap: N, nodeOptionMap: Record<string, any>) {
   const state = new StateSchema(schema);
-  return new StateGraph({ state }).addNode<keyof N & string, N>(nodeMap as any);
+  const builder = new StateGraph({ state });
+  Object.entries(nodeMap).forEach(([key, node]) => {
+    // @ts-expect-error ignore
+    builder.addNode(key, node, nodeOptionMap[key as keyof N]);
+  });
+  return builder as ReturnType<typeof builder.addNode<keyof N & string>>;
 }
 
 export function createGraph<
@@ -20,15 +25,19 @@ export function createGraph<
   B extends ReturnType<typeof createBuilder<T, N>> = ReturnType<typeof createBuilder<T, N>>,
 >(
   config: {
-    schema: T;
+    state: T;
     nodeMap: N;
     edgeMap?: E;
     options?: Partial<{
       compile: Parameters<B['compile']>;
+      node: Record<keyof N, any>;
     }>;
   },
   structGenerater: (
-    initBuilder: (start: K, end: K | K[]) => B,
+    initBuilder: (
+      start?: K | (string & {}),
+      end?: (K | (string & {})) | (K | (string & {}))[],
+    ) => B,
     ctx: {
       nodeMap: N;
       edgeMap: NonNullable<(typeof config)['edgeMap']> extends Record<infer EK, any>
@@ -39,14 +48,15 @@ export function createGraph<
     },
   ) => void,
 ) {
-  const { schema, nodeMap, edgeMap, options } = config;
+  const { state, nodeMap, edgeMap, options } = config;
 
-  const builder = createBuilder<T, N>(schema, nodeMap) as B;
+  const builder = createBuilder<T, N>(state, nodeMap, options?.node || {}) as B;
 
   structGenerater(
     (start, end) => {
-      (Array.isArray(end) ? end : [end]).forEach((item) => builder.addEdge(item, END));
-      return builder.addEdge(START, start);
+      if (end) (Array.isArray(end) ? end : [end]).forEach((item) => builder.addEdge(item, END));
+      if (start) builder.addEdge(START, start);
+      return builder;
     },
     { nodeMap, edgeMap: edgeMap || ({} as any) },
   );

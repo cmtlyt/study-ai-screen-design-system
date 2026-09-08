@@ -4,7 +4,7 @@ import { graphToImage } from './utils/graph-to-image';
 
 const graph = createGraph(
   {
-    schema: {
+    state: {
       price: z.number(),
       approved: z.boolean(),
       result: z.string(),

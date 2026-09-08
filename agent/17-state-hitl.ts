@@ -6,7 +6,7 @@ import { confirm } from '@inquirer/prompts';
 
 const graph = createGraph(
   {
-    schema: {
+    state: {
       price: z.number(),
       approved: z.boolean(),
       result: z.string(),
