@@ -4,24 +4,26 @@ import { graphToImage } from './utils/graph-to-image';
 
 const graph = createGraph(
   {
-    price: z.number(),
-    approved: z.boolean(),
-    result: z.string(),
-  },
-  {
-    reviewRequest(state) {
-      return { approved: state.price <= 500 };
+    schema: {
+      price: z.number(),
+      approved: z.boolean(),
+      result: z.string(),
     },
-    placeOrder(state) {
-      return { result: `申请通过, 使用 ${state.price} 元下单` };
+    nodeMap: {
+      reviewRequest(state) {
+        return { approved: state.price <= 500 };
+      },
+      placeOrder(state) {
+        return { result: `申请通过, 使用 ${state.price} 元下单` };
+      },
+      rejectRequest(state) {
+        return { result: `申请未通过, ${state.price} 太贵了` };
+      },
     },
-    rejectRequest(state) {
-      return { result: `申请未通过, ${state.price} 太贵了` };
-    },
-  },
-  {
-    chooseNext(state) {
-      return state.approved ? 'placeOrder' : 'rejectRequest';
+    edgeMap: {
+      chooseNext(state) {
+        return state.approved ? 'placeOrder' : 'rejectRequest';
+      },
     },
   },
   (initBuilder, { edgeMap }) => {

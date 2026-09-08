@@ -17,26 +17,39 @@ export function createGraph<
   N extends Record<string, StateSchema<T>['Node']> = Record<string, StateSchema<T>['Node']>,
   K extends keyof N & string = keyof N & string,
   E extends Record<string, (state: S) => K> = Record<string, (state: S) => K>,
+  B extends ReturnType<typeof createBuilder<T, N>> = ReturnType<typeof createBuilder<T, N>>,
 >(
-  schema: T,
-  nodeMap: N,
-  edgeMap: E,
-  structGenerater: <
-    B extends ReturnType<typeof createBuilder<T, N>> = ReturnType<typeof createBuilder<T, N>>,
-  >(
+  config: {
+    schema: T;
+    nodeMap: N;
+    edgeMap?: E;
+    options?: Partial<{
+      compile: Parameters<B['compile']>;
+    }>;
+  },
+  structGenerater: (
     initBuilder: (start: K, end: K | K[]) => B,
-    ctx: { nodeMap: N; edgeMap: E },
+    ctx: {
+      nodeMap: N;
+      edgeMap: NonNullable<(typeof config)['edgeMap']> extends Record<infer EK, any>
+        ? string extends EK
+          ? Record<never, any>
+          : NonNullable<(typeof config)['edgeMap']>
+        : Record<never, any>;
+    },
   ) => void,
 ) {
-  const builder = createBuilder<T, N>(schema, nodeMap);
+  const { schema, nodeMap, edgeMap, options } = config;
+
+  const builder = createBuilder<T, N>(schema, nodeMap) as B;
 
   structGenerater(
     (start, end) => {
       (Array.isArray(end) ? end : [end]).forEach((item) => builder.addEdge(item, END));
       return builder.addEdge(START, start);
     },
-    { nodeMap, edgeMap },
+    { nodeMap, edgeMap: edgeMap || ({} as any) },
   );
 
-  return builder.compile();
+  return Reflect.apply(builder.compile, builder, options?.compile || []);
 }
