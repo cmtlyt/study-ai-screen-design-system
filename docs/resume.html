@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>简历</title>
+<style>
+  /* ===== 页面设置：A4、适度边距，HR 打印/预览均友好 ===== */
+  @page { size: A4; margin: 13mm 16mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 9.8pt; line-height: 1.55; color: #1a1a1a;
+  }
+
+  /* ===== 页眉 ===== */
+  h1 { font-size: 17pt; letter-spacing: 2px; margin-bottom: 2px; }
+  .header-meta { color: #444; font-size: 9.6pt; }
+  .header-contact { color: #555; font-size: 9.6pt; margin-top: 2px; }
+
+  /* ===== 章节标题：下边框分隔，紧凑；避免标题成为页尾孤行 ===== */
+  h2 {
+    font-size: 11.2pt; margin: 12px 0 6px; padding-bottom: 3px;
+    border-bottom: 1.6px solid #1a1a1a; letter-spacing: 1px;
+    page-break-after: avoid; break-after: avoid;
+  }
+  hr { border: none; border-top: 0.6px solid #ccc; margin: 8px 0; }
+  h3 { page-break-after: avoid; break-after: avoid; }
+  .proj-meta:first-of-type { page-break-before: avoid; }
+
+  /* ===== 简介段落 ===== */
+  p { margin: 3px 0; text-align: justify; }
+
+  /* ===== 技能行 ===== */
+  .skill-line { margin: 3.5px 0; }
+  .skill-line b { display: inline; }
+
+  /* ===== 项目块 ===== */
+  h3 { font-size: 10.8pt; margin: 9px 0 3px; }
+  .proj-meta { margin: 1.5px 0; font-size: 9.8pt; }
+  .proj-meta b { color: #000; }
+
+  ul { margin: 2px 0 4px 0; padding-left: 15px; }
+  li { margin: 1.8px 0; text-align: justify; }
+
+  /* ===== 工作经历 / 教育 / 荣誉 ===== */
+  .job-line, .edu-line { margin: 3px 0; }
+  ul.honors { padding-left: 15px; }
+  ul.honors li { margin: 1.5px 0; }
+
+  strong { font-weight: 600; }
+</style>
+</head>
+<body>
+<!-- 占位符转换说明：由脚本从 resume.md 自动生成，改简历请改 md 后重新转换 -->
+</body>
+</html>
