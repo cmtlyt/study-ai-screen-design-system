@@ -1,6 +1,6 @@
 # 陈麦特
 
-杭州 · 4 年经验 · 期望：AI Agent 方向全栈/基建工程师 · 月薪 40k
+杭州 · 4 年经验 · 期望：AI Agent 方向全栈/基建工程师
 
 📱 18158777703　✉️ cmtlyt@163.com　🔗 https://github.com/cmtlyt
 
