@@ -21,3 +21,6 @@ overrides:
 peerDependencyRules:
   allowAny:
     - 'vue'
+
+packages:
+  - apps/*
