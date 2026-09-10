@@ -16,8 +16,10 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "devDependencies": {
+    "@ai-screen-design-system/agent-server": "workspace:*",
     "@cmtlyt/lingshu-toolkit": "^0.10.1",
     "@iconify/vue": "^5.0.1",
+    "@langchain/vue": "1.0.30",
     "@tailwindcss/vite": "^4.3.3",
     "@tsconfig/node24": "^24.0.4",
     "@types/express": "^5.0.6",

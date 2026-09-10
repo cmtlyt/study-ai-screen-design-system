@@ -2,11 +2,13 @@
   "name": "@ai-screen-design-system/agent-server",
   "version": "0.0.1",
   "description": "A starter template for creating a LangGraph workflow.",
-  "main": "my_app/graph.ts",
   "author": "Your Name",
   "license": "MIT",
   "private": true,
   "type": "module",
+  "exports": {
+    "./types": "./src/types.ts"
+  },
   "scripts": {
     "dev": "langgraphjs dev",
     "build": "pnpm clean && tsc -p tsconfig.build.json",

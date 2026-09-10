@@ -1,6 +1,6 @@
 <script lang="ts">
 export interface Message {
-  id: string;
+  id?: string;
   type: string;
   text: string;
 }
@@ -21,13 +21,13 @@ defineProps<{
     <div
       v-for="message in messages"
       :key="message.id"
-      class="flex items-start gap-8 max-w-[80%]"
+      class="flex items-start gap-8 max-w-[70%]"
       :class="[message.type === 'human' ? 'self-end flex-row-reverse' : '']"
     >
       <el-avatar class="flex-[0_0_auto]" :size="32">
         {{ message.type === 'human' ? '我' : 'AI' }}
       </el-avatar>
-      <span
+      <div
         class="py-8 px-12 rounded-[12px]"
         :class="[
           message.type === 'human'
@@ -35,8 +35,9 @@ defineProps<{
             : 'rounded-tl-[4px] bg-gray-600',
         ]"
       >
-        {{ message.text }}
-      </span>
+        <span v-if="message.text">{{ message.text }}</span>
+        <span v-else>...</span>
+      </div>
     </div>
   </div>
 </template>

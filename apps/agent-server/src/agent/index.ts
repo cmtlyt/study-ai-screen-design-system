@@ -1,6 +1,6 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { config } from 'dotenv';
-import { StateAnnotation } from './state';
+import { state } from './state';
 import { createModelOnly } from '../ai/model';
 
 config({
@@ -17,13 +17,15 @@ const nodeMap = {
       messages: [result],
     };
   },
-} satisfies Record<string, typeof StateAnnotation.Node>;
+} satisfies Record<string, typeof state.Node>;
 
-const builder = new StateGraph(StateAnnotation)
+const builder = new StateGraph(state)
   .addNode<keyof typeof nodeMap, typeof nodeMap>(nodeMap)
   .addEdge(START, 'answerMessage')
   .addEdge('answerMessage', END);
 
 export const graph = builder.compile();
+
+export type AgentInputState = Parameters<typeof graph.invoke>[0];
 
 graph.name = 'ScreenDesignAgent';

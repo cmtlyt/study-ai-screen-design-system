@@ -1,5 +1,5 @@
 import { MessagesValue, StateSchema } from '@langchain/langgraph';
 
-export const StateAnnotation = new StateSchema({
+export const state = new StateSchema({
   messages: MessagesValue,
 });
