@@ -77,7 +77,7 @@ onMounted(async () => {
         <PropertyPanel />
       </aside>
       <!-- AI -->
-      <aside class="border-l" :class="[panelVisible.ai ? 'w-460' : 'w-0']">
+      <aside class="border-l" :class="[panelVisible.ai ? 'w-480' : 'w-0']">
         <AiPanel />
       </aside>
     </main>

@@ -9,7 +9,7 @@ defineOptions({
 
 const content = ref('');
 
-const { messages, isLoading, submit } = useStream<AgentInputState>({
+const { messages, isLoading, submit, stop } = useStream<AgentInputState>({
   apiUrl: 'http://localhost:2024',
   assistantId: 'agent',
   transport: 'sse',
@@ -29,11 +29,15 @@ function onKeydown(_event: KeyboardEvent | Event) {
   event.stopPropagation();
   onSubmit();
 }
+
+function onCancel() {
+  stop();
+}
 </script>
 
 <template>
   <div class="flex flex-col h-full overflow-hidden">
-    <MessageList class="flex-1" :messages="messages" />
+    <MessageList class="flex-1" :messages="messages" :loading="isLoading" />
     <footer class="flex flex-col gap-8 p-12 border-t border-border">
       <el-input
         type="textarea"
@@ -42,7 +46,8 @@ function onKeydown(_event: KeyboardEvent | Event) {
         resize="none"
         @keydown.enter="onKeydown"
       ></el-input>
-      <el-button type="primary" :loading="isLoading" @click="onSubmit">发送</el-button>
+      <el-button v-if="isLoading" type="danger" @click="onCancel">取消</el-button>
+      <el-button v-else type="primary" @click="onSubmit">发送</el-button>
     </footer>
   </div>
 </template>
