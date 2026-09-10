@@ -2,6 +2,7 @@
 import MessageList from './components/message-list.vue';
 import { useStream } from '@langchain/vue';
 import type { AgentInputState } from '@ai-screen-design-system/agent-server/types';
+import { getThreadId, setThreadId, deleteThreadId } from './thread-storage';
 
 defineOptions({
   name: 'AiPanel',
@@ -9,10 +10,12 @@ defineOptions({
 
 const content = ref('');
 
-const { messages, isLoading, submit, stop } = useStream<AgentInputState>({
+const { client, messages, isLoading, submit, stop } = useStream<AgentInputState>({
   apiUrl: 'http://localhost:2024',
   assistantId: 'agent',
   transport: 'sse',
+  threadId: getThreadId(),
+  onThreadId: setThreadId,
 });
 
 function onSubmit() {
@@ -33,6 +36,14 @@ function onKeydown(_event: KeyboardEvent | Event) {
 function onCancel() {
   stop();
 }
+
+async function onDelete() {
+  const threadId = getThreadId();
+  if (!threadId) return;
+  await client.threads.delete(threadId);
+  deleteThreadId();
+  location.reload();
+}
 </script>
 
 <template>
@@ -46,8 +57,19 @@ function onCancel() {
         resize="none"
         @keydown.enter="onKeydown"
       ></el-input>
-      <el-button v-if="isLoading" type="danger" @click="onCancel">取消</el-button>
-      <el-button v-else type="primary" @click="onSubmit">发送</el-button>
+      <div class="flex items-center justify-between">
+        <div>
+          <vue-icon
+            icon="fluent:delete-12-filled"
+            class="transition-colors hover:text-red-500"
+            @click="onDelete"
+          />
+        </div>
+        <div>
+          <el-button v-if="isLoading" type="danger" @click="onCancel">取消</el-button>
+          <el-button v-else type="primary" @click="onSubmit">发送</el-button>
+        </div>
+      </div>
     </footer>
   </div>
 </template>

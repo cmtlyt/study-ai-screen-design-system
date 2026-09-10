@@ -10,7 +10,7 @@
     "./types": "./src/types.ts"
   },
   "scripts": {
-    "dev": "langgraphjs dev",
+    "dev": "langgraphjs dev --no-browser",
     "build": "pnpm clean && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns=\\.test\\.ts$ --testPathIgnorePatterns=\\.int\\.test\\.ts$",
