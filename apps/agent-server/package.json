@@ -9,7 +9,7 @@
   "type": "module",
   "scripts": {
     "dev": "langgraphjs dev",
-    "build": "tsc",
+    "build": "pnpm clean && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns=\\.test\\.ts$ --testPathIgnorePatterns=\\.int\\.test\\.ts$",
     "test:int": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns=\\.int\\.test\\.ts$",
@@ -21,6 +21,8 @@
   "dependencies": {
     "@langchain/core": "catalog:",
     "@langchain/langgraph": "catalog:",
+    "@langchain/openai": "catalog:",
+    "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
@@ -33,7 +35,6 @@
     "@typescript-eslint/eslint-plugin": "^8.69.0",
     "@typescript-eslint/parser": "^8.69.0",
     "@typescript/native": "npm:typescript@^7.0.2",
-    "dotenv": "catalog:",
     "eslint": "^10.10.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

@@ -1,6 +1,5 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { describe, it, expect } from '@jest/globals';
-import { graph } from '../src/agent/graph.js';
+import { graph } from '../src/agent';
 
 describe('Graph', () => {
   it('should process input through the graph', async () => {

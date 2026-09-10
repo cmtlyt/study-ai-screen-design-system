@@ -1,0 +1,29 @@
+import { END, START, StateGraph } from '@langchain/langgraph';
+import { config } from 'dotenv';
+import { StateAnnotation } from './state';
+import { createModelOnly } from '../ai/model';
+
+config({
+  path: ['.env', '.env.local'],
+  override: true,
+});
+
+const nodeMap = {
+  async answerMessage(state) {
+    console.log('Current state:', state);
+    const model = createModelOnly();
+    const result = await model.invoke(state.messages);
+    return {
+      messages: [result],
+    };
+  },
+} satisfies Record<string, typeof StateAnnotation.Node>;
+
+const builder = new StateGraph(StateAnnotation)
+  .addNode<keyof typeof nodeMap, typeof nodeMap>(nodeMap)
+  .addEdge(START, 'answerMessage')
+  .addEdge('answerMessage', END);
+
+export const graph = builder.compile();
+
+graph.name = 'ScreenDesignAgent';

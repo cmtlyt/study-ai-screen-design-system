@@ -16,10 +16,11 @@
     "allowJs": true,
     "strict": true,
     "strictFunctionTypes": false,
+    "rootDir": "src",
     "outDir": "dist",
     "types": ["jest", "node"],
     "resolveJsonModule": true
   },
-  "include": ["**/*.ts", "**/*.js"],
+  "include": ["src/**/*.ts", "src/**/*.js"],
   "exclude": ["node_modules", "dist"]
 }

@@ -14,7 +14,6 @@ dist
 **/.turbo
 **/.eslintcache
 
-.env
 .ipynb_checkpoints
 
 
