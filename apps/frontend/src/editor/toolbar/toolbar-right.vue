@@ -102,6 +102,10 @@ async function publish() {
   editorStore.updatePageId(id);
   window.open(`/screen?id=${id}`, '_blank');
 }
+
+function showAiPanel() {
+  editorStore.panelVisible.ai = !editorStore.panelVisible.ai;
+}
 </script>
 
 <template>
@@ -117,6 +121,9 @@ async function publish() {
       ],
     ]"
   >
+    <span class="icon" @click="showAiPanel">
+      <vue-icon icon="mingcute:ai-fill" />
+    </span>
     <span class="icon" @click="openDataSourceManager">
       <vue-icon icon="material-symbols:database" />
     </span>

@@ -6,6 +6,7 @@ import MaterialPanel from './panels/material/index.vue';
 import LayerPanel from './panels/layer/index.vue';
 import CanvasRoot from './canvas/index.vue';
 import PropertyPanel from './panels/property/index.vue';
+import AiPanel from './panels/ai/index.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getPublishedScreen } from '@/utils/publish.ts';
 import { storeToRefs } from 'pinia';
@@ -74,6 +75,10 @@ onMounted(async () => {
       <!-- 属性 -->
       <aside class="border-l" :class="[panelVisible.property ? 'w-400' : 'w-0']">
         <PropertyPanel />
+      </aside>
+      <!-- AI -->
+      <aside class="border-l" :class="[panelVisible.ai ? 'w-460' : 'w-0']">
+        <AiPanel />
       </aside>
     </main>
   </div>
