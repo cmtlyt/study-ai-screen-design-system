@@ -276,6 +276,15 @@ importers:
 
   .:
     devDependencies:
+      '@types/node':
+        specifier: ^24.13.3
+        version: 24.13.3
+      tsx:
+        specifier: ^4.23.10
+        version: 4.23.10
+
+  apps/agent-example:
+    devDependencies:
       '@inquirer/prompts':
         specifier: 'catalog:'
         version: 8.7.2(@types/node@24.13.3)
@@ -303,9 +312,6 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 'catalog:'
         version: 1.29.0(@cfworker/json-schema@4.1.1)(supports-color@8.1.1)(zod@4.5.4)
-      '@types/node':
-        specifier: ^24.13.3
-        version: 24.13.3
       dotenv:
         specifier: 'catalog:'
         version: 17.4.2
@@ -327,9 +333,6 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.9.5
-      tsx:
-        specifier: ^4.23.10
-        version: 4.23.10
       zod:
         specifier: 'catalog:'
         version: 4.5.4

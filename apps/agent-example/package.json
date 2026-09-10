@@ -1,0 +1,35 @@
+{
+  "name": "@ai-screen-design-system/agent-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^11.4.0"
+    }
+  },
+  "type": "module",
+  "devDependencies": {
+    "@inquirer/prompts": "catalog:",
+    "@langchain/classic": "catalog:",
+    "@langchain/core": "catalog:",
+    "@langchain/langgraph": "catalog:",
+    "@langchain/langgraph-checkpoint-sqlite": "catalog:",
+    "@langchain/mcp-adapters": "catalog:",
+    "@langchain/openai": "catalog:",
+    "@langchain/textsplitters": "catalog:",
+    "@modelcontextprotocol/sdk": "catalog:",
+    "dotenv": "catalog:",
+    "express": "catalog:",
+    "gray-matter": "catalog:",
+    "langchain": "catalog:",
+    "mammoth": "catalog:",
+    "pdf-parse": "catalog:",
+    "zod": "catalog:",
+    "prettier": "catalog:"
+  }
+}

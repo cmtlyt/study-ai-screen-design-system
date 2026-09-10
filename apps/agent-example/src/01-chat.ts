@@ -1,6 +1,5 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { config } from 'dotenv';
-import { input } from '@inquirer/prompts';
 import { env } from 'node:process';
 
 config();

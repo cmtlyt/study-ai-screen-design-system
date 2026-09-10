@@ -19,23 +19,6 @@
   "type": "module",
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "@inquirer/prompts": "catalog:",
-    "@langchain/classic": "catalog:",
-    "@langchain/core": "catalog:",
-    "@langchain/langgraph": "catalog:",
-    "@langchain/langgraph-checkpoint-sqlite": "catalog:",
-    "@langchain/mcp-adapters": "catalog:",
-    "@langchain/openai": "catalog:",
-    "@langchain/textsplitters": "catalog:",
-    "@modelcontextprotocol/sdk": "catalog:",
-    "dotenv": "catalog:",
-    "express": "catalog:",
-    "gray-matter": "catalog:",
-    "langchain": "catalog:",
-    "mammoth": "catalog:",
-    "pdf-parse": "catalog:",
-    "zod": "catalog:",
-    "prettier": "catalog:",
     "tsx": "^4.23.10"
   }
 }
