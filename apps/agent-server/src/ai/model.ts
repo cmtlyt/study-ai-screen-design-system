@@ -1,10 +1,11 @@
 import { Runnable } from '@langchain/core/runnables';
 import { DynamicStructuredTool } from '@langchain/core/tools';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI, ChatOpenAIFields } from '@langchain/openai';
 import { env } from 'process';
 
 export function createModelOnly<T extends DynamicStructuredTool[] | undefined = undefined>(
   toolList?: T,
+  options?: ChatOpenAIFields,
 ): T extends undefined ? ChatOpenAI : Runnable {
   let chatModel = new ChatOpenAI({
     model: env.AI_MODEL,
@@ -18,9 +19,10 @@ export function createModelOnly<T extends DynamicStructuredTool[] | undefined = 
         enable_thinking: false,
       },
     },
+    ...options,
   });
 
-  if (toolList) {
+  if (toolList?.length) {
     chatModel = chatModel.bindTools(toolList) as any;
   }
 

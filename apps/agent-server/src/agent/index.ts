@@ -10,8 +10,15 @@ config({
 
 const builder = new StateGraph(state)
   .addNode<keyof NodeMap, NodeMap>(NODE_MAP)
-  .addEdge(START, 'answerMessage')
-  .addEdge('answerMessage', END);
+  .addEdge(START, 'classifyTaskHandler')
+  .addConditionalEdges('classifyTaskHandler', (state) => state.classifycation.task, {
+    page: 'pageTaskHandler',
+    ask: 'askTaskHandler',
+    edit: 'editTaskHandler',
+  })
+  .addEdge('askTaskHandler', END)
+  .addEdge('editTaskHandler', END)
+  .addEdge('pageTaskHandler', END);
 
 export const graph = builder.compile();
 

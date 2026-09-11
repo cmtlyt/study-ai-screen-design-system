@@ -1,5 +1,6 @@
 import { MessagesValue, StateSchema } from '@langchain/langgraph';
 import z from 'zod';
+import { classifycationSchema } from './node-map/classifycation';
 
 export const state = new StateSchema({
   messages: MessagesValue,
@@ -9,6 +10,7 @@ export const state = new StateSchema({
     material: z.array(z.record(z.string(), z.json())),
     canvas: z.record(z.string(), z.json()),
   }),
+  classifycation: classifycationSchema,
 });
 
 export type State = typeof state.State;
