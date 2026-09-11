@@ -7,10 +7,20 @@ export const state = new StateSchema({
   page: z.record(z.string(), z.json()),
   selectedNodeIds: z.array(z.string()),
   schema: z.object({
-    material: z.array(z.record(z.string(), z.json())),
+    material: z.array(
+      z.object({
+        type: z.string(),
+        name: z.string(),
+        schema: z.record(z.string(), z.json()),
+      }),
+    ),
     canvas: z.record(z.string(), z.json()),
   }),
   classifycation: classifycationSchema,
+  action: z.object({
+    type: z.literal('add_node'),
+    node: z.record(z.string(), z.json()).nullable(),
+  }),
 });
 
 export type State = typeof state.State;

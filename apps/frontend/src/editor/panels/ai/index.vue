@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import MessageList from './components/message-list.vue';
 import { useStream } from '@langchain/vue';
-import type { AgentInputState } from '@ai-screen-design-system/agent-server/types';
+import type { AgentInputState, AgentState } from '@ai-screen-design-system/agent-server/types';
 import { getThreadId, setThreadId, deleteThreadId } from './thread-storage';
 import { storeToRefs } from 'pinia';
 import { useEditorStore } from '@/stores/editor';
@@ -12,16 +12,28 @@ defineOptions({
   name: 'AiPanel',
 });
 
-const content = ref('');
-const { page, selectedNodeIds } = storeToRefs(useEditorStore());
+const editorStore = useEditorStore();
+const { page, selectedNodeIds } = storeToRefs(editorStore);
 
-const { client, messages, isLoading, submit, stop } = useStream<AgentInputState>({
+const { client, messages, isLoading, values, submit, stop } = useStream<AgentInputState>({
   apiUrl: 'http://localhost:2024',
   assistantId: 'agent',
   transport: 'sse',
   threadId: getThreadId(),
   onThreadId: setThreadId,
 });
+
+watch(
+  () => (values.value as AgentState)?.action,
+  (action) => {
+    if (!action) return;
+    if (action.type === 'add_node' && action.node) {
+      editorStore.addNode(action.node as any);
+    }
+  },
+);
+
+const content = ref('');
 
 function onSubmit() {
   const value = content.value.trim();

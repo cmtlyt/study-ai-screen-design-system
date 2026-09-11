@@ -28,3 +28,14 @@ export function createModelOnly<T extends DynamicStructuredTool[] | undefined = 
 
   return chatModel;
 }
+
+export function createNoStreamModel<T extends DynamicStructuredTool[] | undefined = undefined>(
+  toolList?: T,
+  options?: ChatOpenAIFields,
+) {
+  return createModelOnly<T>(toolList, {
+    disableStreaming: true,
+    tags: ['nostream'],
+    ...options,
+  });
+}
