@@ -1,6 +1,11 @@
 import { defineMaterial } from '@/materials/types';
+import { configSchema } from '../schema';
+import z from 'zod';
 
 export const material = defineMaterial({
+  configSchema: configSchema.extend({
+    type: z.literal('line-chart'),
+  }),
   name: '折线图',
   icon: 'fluent-color:list-bar-16',
   cagetory: 'chart',

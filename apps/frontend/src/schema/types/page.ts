@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { materialSchema } from './material';
 
-const canvasSchema = z.object({
+export const canvasSchema = z.object({
   width: z.number().min(1),
   height: z.number().min(1),
   backgroundColor: z.string(),

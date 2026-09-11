@@ -28,8 +28,8 @@ export const materialSchema = z.object({
   type: z.string(),
   name: z.string(),
   layout: materialLayoutSchema,
-  locked: z.boolean(),
-  style: z.any().optional(),
+  locked: z.boolean().optional().default(false),
+  style: z.record(z.string(), z.string()).optional(),
   props: z
     .object({
       dataId: z.string().optional(),

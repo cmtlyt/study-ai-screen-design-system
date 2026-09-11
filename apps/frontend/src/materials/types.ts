@@ -1,6 +1,7 @@
 import type { DefineMaterialSchema, MaterialPositionLayoutSchema } from '@/schema/types';
 import type { ComputedDeepKeys, ComputedKeys } from '@/types';
 import type { Component } from 'vue';
+import type { z } from 'zod';
 
 export type CagetoryKey = 'chart' | 'form' | 'info';
 
@@ -39,6 +40,7 @@ export interface EventOption {
 }
 
 export interface Material {
+  configSchema: z.ZodObject;
   name: string;
   icon: string;
   cagetory: CagetoryKey;
@@ -72,10 +74,16 @@ export type PositionLayoutLayoutSetters =
 export type NodeInfoSetters = DefineSetter<`name` | `locked`>[];
 
 export function defineMaterial<
+  ConfigSchema extends z.ZodObject,
   Schema extends DefineMaterialSchema,
   Setters extends DefineSetter<ComputedSchemaKeys<Schema>>[],
 >(
-  material: Omit<Material, 'eventOptions'> & { schema: Schema } & { setters: Setters } & {
+  material: Omit<Material, 'eventOptions'> & {
+    configSchema: ConfigSchema;
+    schema: Schema & Omit<z.infer<ConfigSchema>, 'id' | 'locked'>;
+  } & {
+    setters: Setters;
+  } & {
     eventOptions?: EventOption[];
   },
 ): Material {

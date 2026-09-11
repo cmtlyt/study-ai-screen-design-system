@@ -1,5 +1,5 @@
 import type { Component } from 'vue';
-import type { Cagetory, CagetoryKey, InstallCtx, Material, Setter } from './types';
+import type { Cagetory, CagetoryKey, InstallCtx, Material } from './types';
 import type { MaterialSchema, DefineMaterialSchema } from '@/schema/types';
 
 export type * from './types';
@@ -73,4 +73,14 @@ export function createNode(node: Partial<MaterialSchema> & DefineMaterialSchema)
 
 export function isParsedNode(node: DefineMaterialSchema) {
   return Boolean((node as any)[PARSED_NODE]);
+}
+
+export function getAllMaterialSchema() {
+  return materials.map((item) => {
+    return {
+      type: item.schema.type,
+      name: item.name,
+      schema: item.configSchema.toJSONSchema({ unrepresentable: 'any' }),
+    };
+  });
 }

@@ -1,6 +1,11 @@
+import { z } from 'zod';
 import { defineMaterial } from '@/materials/types';
+import { configSchema } from '../schema';
 
 export const material = defineMaterial({
+  configSchema: configSchema.extend({
+    type: z.literal('pie-chart'),
+  }),
   name: '饼图',
   icon: 'fluent-color:list-bar-16',
   cagetory: 'chart',

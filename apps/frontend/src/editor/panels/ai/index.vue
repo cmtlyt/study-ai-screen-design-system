@@ -3,12 +3,17 @@ import MessageList from './components/message-list.vue';
 import { useStream } from '@langchain/vue';
 import type { AgentInputState } from '@ai-screen-design-system/agent-server/types';
 import { getThreadId, setThreadId, deleteThreadId } from './thread-storage';
+import { storeToRefs } from 'pinia';
+import { useEditorStore } from '@/stores/editor';
+import { getAllMaterialSchema } from '@/materials/index';
+import { canvasSchema } from '@/schema/types/page';
 
 defineOptions({
   name: 'AiPanel',
 });
 
 const content = ref('');
+const { page, selectedNodeIds } = storeToRefs(useEditorStore());
 
 const { client, messages, isLoading, submit, stop } = useStream<AgentInputState>({
   apiUrl: 'http://localhost:2024',
@@ -21,7 +26,15 @@ const { client, messages, isLoading, submit, stop } = useStream<AgentInputState>
 function onSubmit() {
   const value = content.value.trim();
   if (isLoading.value || !value) return;
-  submit({ messages: [{ type: 'human', content: value }] });
+  submit({
+    messages: [{ type: 'human', content: value }],
+    page: page.value,
+    selectedNodeIds: selectedNodeIds.value,
+    schema: {
+      material: getAllMaterialSchema(),
+      canvas: canvasSchema.toJSONSchema(),
+    },
+  });
   content.value = '';
 }
 

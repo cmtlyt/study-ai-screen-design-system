@@ -1,7 +1,15 @@
+import { z } from 'zod';
+import { materialSchema } from '@/schema/types/material';
 import { defineMaterial, type InstallCtx } from '../types';
 import TextMaterial from './component.vue';
 
 const textMaterial = defineMaterial({
+  configSchema: materialSchema.extend({
+    type: z.literal('text'),
+    props: z.object({
+      content: z.string(),
+    }),
+  }),
   name: '文本',
   icon: 'icon-park-outline:text',
   cagetory: 'info',

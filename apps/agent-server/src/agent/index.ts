@@ -1,26 +1,15 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { config } from 'dotenv';
 import { state } from './state';
-import { createModelOnly } from '../ai/model';
+import { NodeMap, NODE_MAP } from './node-map';
 
 config({
   path: ['.env', '.env.local'],
   override: true,
 });
 
-const nodeMap = {
-  async answerMessage(state) {
-    console.log('Current state:', state);
-    const model = createModelOnly();
-    const result = await model.invoke(state.messages);
-    return {
-      messages: [result],
-    };
-  },
-} satisfies Record<string, typeof state.Node>;
-
 const builder = new StateGraph(state)
-  .addNode<keyof typeof nodeMap, typeof nodeMap>(nodeMap)
+  .addNode<keyof NodeMap, NodeMap>(NODE_MAP)
   .addEdge(START, 'answerMessage')
   .addEdge('answerMessage', END);
 

@@ -1,6 +1,11 @@
 import { defineMaterial } from '@/materials/types';
+import { configSchema } from '../schema';
+import z from 'zod';
 
 export const material = defineMaterial({
+  configSchema: configSchema.extend({
+    type: z.literal('bar-chart'),
+  }),
   name: '柱状图',
   icon: 'lets-icons:chart',
   cagetory: 'chart',

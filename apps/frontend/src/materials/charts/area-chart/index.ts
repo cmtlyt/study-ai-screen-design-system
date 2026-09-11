@@ -1,6 +1,11 @@
 import { defineMaterial } from '@/materials/types';
+import { configSchema } from '../schema';
+import z from 'zod';
 
 export const material = defineMaterial({
+  configSchema: configSchema.extend({
+    type: z.literal('area-chart'),
+  }),
   name: '面积图',
   icon: 'fluent-color:list-bar-16',
   cagetory: 'chart',
