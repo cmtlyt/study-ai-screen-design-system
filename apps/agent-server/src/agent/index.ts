@@ -14,12 +14,21 @@ const builder = new StateGraph(state)
   .addConditionalEdges('classifyTaskHandler', (state) => state.classifycation.task, {
     page: 'pageTaskHandler',
     ask: 'askTaskHandler',
-    edit: 'editTaskHandler',
-  })
-  .addEdge('askTaskHandler', END)
+    edit: 'editPlanTaskHandler',
+  });
+// ask
+builder.addEdge('askTaskHandler', END);
+// edit
+builder
+  .addConditionalEdges(
+    'editPlanTaskHandler',
+    (state) => (state.editPlan?.length ? 'editTaskHandler' : END),
+    ['editTaskHandler', END],
+  )
   .addEdge('editTaskHandler', 'editResultHandler')
-  .addEdge('editResultHandler', END)
-  .addEdge('pageTaskHandler', END);
+  .addEdge('editResultHandler', END);
+// page
+builder.addEdge('pageTaskHandler', END);
 
 export const graph = builder.compile();
 

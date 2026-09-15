@@ -15,7 +15,7 @@ export async function publishScreen(page: PageSchema) {
   }
   allScreen[id] = { ...page, id };
   localStorage.setItem(SCREEN_PUBLISH_KEY, JSON.stringify(allScreen));
-  return id;
+  return id as string;
 }
 
 export async function getPublishedScreen(id: string) {

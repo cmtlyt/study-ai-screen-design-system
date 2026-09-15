@@ -2,6 +2,7 @@
 import MessageList from './components/message-list.vue';
 import { useStream } from '@langchain/vue';
 import type { AgentInputState, AgentState } from '@ai-screen-design-system/agent-server/types';
+import { ACTION_TYPES } from '@ai-screen-design-system/agent-server';
 import { getThreadId, setThreadId, deleteThreadId } from './thread-storage';
 import { storeToRefs } from 'pinia';
 import { useEditorStore } from '@/stores/editor';
@@ -28,17 +29,23 @@ const { client, messages, isLoading, values, submit, stop } = useStream<AgentInp
 });
 
 watch(
-  () => (values.value as AgentState)?.action,
-  (action) => {
-    if (!action) return;
-    if (action.type === 'add_node' && action.node) {
-      editorStore.addNode(action.node as any);
-      return;
-    }
-    if (action.type === 'update_node' && action.node && action.nodeId) {
-      editorStore.updateNode(action.nodeId, action.node as any);
-      return;
-    }
+  () => (values.value as AgentState)?.actions,
+  (actions) => {
+    if (!actions?.length) return;
+    actions.forEach((action) => {
+      if (action.type === ACTION_TYPES.addNode && action.node) {
+        editorStore.addNode(action.node as any);
+        return;
+      }
+      if (action.type === ACTION_TYPES.updateNode && action.node && action.node.id) {
+        editorStore.updateNode(action.node.id as string, action.node as any);
+        return;
+      }
+      if (action.type === ACTION_TYPES.removeNode && action.node) {
+        editorStore.removeNode(action.node as any);
+        return;
+      }
+    });
   },
 );
 

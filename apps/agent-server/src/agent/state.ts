@@ -1,6 +1,7 @@
 import { MessagesValue, StateSchema } from '@langchain/langgraph';
 import z from 'zod';
 import { classifycationSchema } from './node-map/classifycation';
+import { planEditSchema, actionTypeSchema } from './node-map/edit-plan';
 
 export const state = new StateSchema({
   messages: MessagesValue,
@@ -17,17 +18,15 @@ export const state = new StateSchema({
     canvas: z.record(z.string(), z.json()),
   }),
   classifycation: classifycationSchema,
-  action: z.union([
-    z.object({
-      type: z.literal('add_node'),
-      node: z.record(z.string(), z.json()).nullable(),
-    }),
-    z.object({
-      type: z.literal('update_node'),
-      node: z.record(z.string(), z.json()).nullable(),
-      nodeId: z.string(),
-    }),
-  ]),
+  actions: z
+    .array(
+      z.looseObject({
+        type: actionTypeSchema,
+        node: z.record(z.string(), z.json()).nullable(),
+      }),
+    )
+    .nullable(),
+  editPlan: z.array(planEditSchema).nullable(),
 });
 
 export type State = typeof state.State;

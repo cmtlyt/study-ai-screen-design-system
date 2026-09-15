@@ -3,7 +3,7 @@ import { createModelOnly } from '../../ai/model';
 import { defineNode } from '../define';
 
 export const editResultHandler = defineNode(async (state) => {
-  if (!state.action) return {};
+  if (!state.actions) return {};
 
   const model = createModelOnly();
 
@@ -16,11 +16,11 @@ export const editResultHandler = defineNode(async (state) => {
 4. 不显示任何 JSON 或代码, 只输出自然语言文本
 5. 除非用户主动询问, 否则不会追加操作建议或追问`),
     ...state.messages,
-    new HumanMessage(`已经完成的动作\n\n${JSON.stringify(state.action)}`),
+    new HumanMessage(`已经完成的动作\n\n${JSON.stringify(state.actions)}`),
   ]);
 
   return {
     messages: [result],
-    action: void 0,
+    actions: null,
   };
 });

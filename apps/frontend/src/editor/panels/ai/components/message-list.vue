@@ -40,7 +40,7 @@ onMounted(() => {
 
     if (!allowScroll) {
       scrollCache.add(dom);
-      dom.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      dom.scrollIntoView({ block: 'start' });
     }
 
     return allowScroll;

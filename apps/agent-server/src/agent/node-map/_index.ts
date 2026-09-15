@@ -4,6 +4,7 @@ import { classifyTaskHandler } from './classifycation';
 import { editTaskHandler } from './edit';
 import { editResultHandler } from './edit-result';
 import { pageTaskHandler } from './page';
+import { editPlanTaskHandler } from './edit-plan';
 
 export const NODE_MAP = {
   askTaskHandler,
@@ -11,6 +12,7 @@ export const NODE_MAP = {
   editTaskHandler,
   classifyTaskHandler,
   editResultHandler,
+  editPlanTaskHandler,
 } satisfies Record<string, typeof state.Node>;
 
 export type NodeMap = typeof NODE_MAP;

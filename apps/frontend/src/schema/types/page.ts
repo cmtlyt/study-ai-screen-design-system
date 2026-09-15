@@ -33,7 +33,7 @@ const dataSourceSchema = z.union([
 export type DataSourceSchema = z.infer<typeof dataSourceSchema>;
 
 export const pageSchema = z.object({
-  id: z.string().min(1),
+  id: z.union([z.string().min(1), z.symbol()]),
   name: z.string().min(1),
   canvas: canvasSchema,
   nodes: z.array(materialSchema),
