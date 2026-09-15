@@ -38,20 +38,12 @@ async function generateNode(
   materialSchema: Awaited<ReturnType<typeof getMaterialSchema>>,
 ) {
   if (!materialSchema) return null;
-  const schema = (z.fromJSONSchema(materialSchema.schema) as any).extend({
-    id: z.literal(crypto.randomUUID()),
+  const schema = structuredClone(materialSchema.schema);
+  (schema.properties as any).id.const = crypto.randomUUID();
+  const model = createNoStreamModel().withStructuredOutput(schema, {
+    name: 'node_schema',
+    method: 'jsonSchema',
   });
-  console.debug('schema:', schema);
-  const model = createNoStreamModel().withStructuredOutput(
-    z.object({
-      node: schema,
-    }),
-    {
-      name: 'node_schema',
-      method: 'jsonSchema',
-    },
-  );
-  console.debug('model:', model);
 
   const result = await model.invoke([
     new SystemMessage(
@@ -60,8 +52,7 @@ async function generateNode(
     getLastUserMessage(state.messages)!,
   ]);
 
-  console.debug('node:', result);
-  return result.node;
+  return result;
 }
 
 export const editTaskHandler = defineNode(async (state) => {

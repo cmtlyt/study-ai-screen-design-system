@@ -80,7 +80,7 @@ export function getAllMaterialSchema() {
     return {
       type: item.schema.type,
       name: item.name,
-      schema: item.configSchema.toJSONSchema({ unrepresentable: 'any' }),
+      schema: item.configSchema.toJSONSchema(),
     };
   });
 }
