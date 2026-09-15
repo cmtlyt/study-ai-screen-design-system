@@ -14,6 +14,7 @@ defineOptions({
 
 const editorStore = useEditorStore();
 const { page, selectedNodeIds } = storeToRefs(editorStore);
+const runId = ref<string | null>(null);
 
 const { client, messages, isLoading, values, submit, stop } = useStream<AgentInputState>({
   apiUrl: 'http://localhost:2024',
@@ -21,6 +22,9 @@ const { client, messages, isLoading, values, submit, stop } = useStream<AgentInp
   transport: 'sse',
   threadId: getThreadId(),
   onThreadId: setThreadId,
+  onCreated: (info) => {
+    runId.value = info.runId;
+  },
 });
 
 watch(
@@ -63,7 +67,8 @@ function onKeydown(_event: KeyboardEvent | Event) {
   onSubmit();
 }
 
-function onCancel() {
+async function onCancel() {
+  await client.runs.cancel(getThreadId()!, runId.value!, true, 'rollback');
   stop();
 }
 

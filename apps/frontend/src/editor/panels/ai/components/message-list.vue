@@ -53,6 +53,12 @@ onMounted(() => {
   });
   resizeObserver.observe(ml);
 });
+
+const showAiLoadingMessage = computed(() => {
+  if (!props.loading) return false;
+
+  return props.messages.at(-1)?.type !== 'ai';
+});
 </script>
 
 <template>
@@ -86,6 +92,13 @@ onMounted(() => {
             :final="true"
           />
           <span v-else>...</span>
+        </div>
+      </div>
+
+      <div v-if="showAiLoadingMessage" class="flex items-start gap-8 max-w-[85%]">
+        <el-avatar class="flex-[0_0_auto]" :size="32">AI</el-avatar>
+        <div class="py-8 px-12 rounded-[12px]" :class="['rounded-tl-[4px] bg-gray-600']">
+          <span>...</span>
         </div>
       </div>
     </div>

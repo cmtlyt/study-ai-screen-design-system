@@ -40,12 +40,6 @@ async function generateNode(
   if (!materialSchema) return null;
   const schema = structuredClone(materialSchema.schema);
   (schema.properties as any).id.const = crypto.randomUUID();
-  (schema.properties as any).message = {
-    type: 'string',
-    description: '告诉用户做了什么工作',
-  };
-  schema.required ||= [];
-  (schema.required as string[]).push('message');
   const model = createNoStreamModel().withStructuredOutput(schema, {
     name: 'node_schema',
     method: 'jsonSchema',
@@ -55,7 +49,7 @@ async function generateNode(
     new SystemMessage(
       `你是一个 AI 大屏设计器的物料 schema 识别助手, 请根据用户输入的内容生成${materialSchema.name}物料的配置\n\n物料 schema:\n${JSON.stringify(materialSchema.schema)}`,
     ),
-    getLastUserMessage(state.messages)!,
+    ...state.messages,
   ]);
 
   return result;
@@ -69,12 +63,6 @@ async function updateNode(
   if (!materialSchema) return null;
   const schema = structuredClone(materialSchema.schema);
   (schema.properties as any).id.const = selectedNode.id;
-  (schema.properties as any).message = {
-    type: 'string',
-    description: '告诉用户做了什么工作',
-  };
-  schema.required ||= [];
-  (schema.required as string[]).push('message');
   const model = createNoStreamModel().withStructuredOutput(schema, {
     name: 'node_schema',
     method: 'jsonSchema',
@@ -86,7 +74,7 @@ async function updateNode(
 不允许修改节点的 id, type, name 属性, 这些属性是节点的唯一标识, 不能修改
 \n当前节点的内容 schema:\n${JSON.stringify(selectedNode)}`,
     ),
-    getLastUserMessage(state.messages)!,
+    ...state.messages,
   ]);
 
   result.id = selectedNode.id;
@@ -100,11 +88,8 @@ export const editTaskHandler = defineNode(async (state) => {
 
   if (classifycation?.operation === 'add_node') {
     const schema = await getMaterialSchema(state);
-    const { message, ...node } = (await generateNode(state, schema)) || {};
-    return {
-      messages: [new AIMessage(`节点生成成功: ${message}`)],
-      action: { type: 'add_node', node },
-    };
+    const node = (await generateNode(state, schema)) || {};
+    return { action: { type: 'add_node', node } };
   }
 
   if (classifycation?.operation === 'update_node') {
@@ -123,11 +108,10 @@ export const editTaskHandler = defineNode(async (state) => {
       return { messages: [new AIMessage('未找到选中节点的物料 schema')] };
     }
 
-    const { message, ...node } = (await updateNode(state, selectedNode, materialSchema)) || {};
+    const node = (await updateNode(state, selectedNode, materialSchema)) || {};
     console.debug('Updated node:', node);
 
     return {
-      messages: [new AIMessage(`节点修改成功: ${message}`)],
       action: { type: 'update_node', node, nodeId: selectedNodeId },
     };
   }

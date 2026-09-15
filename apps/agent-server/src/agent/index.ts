@@ -17,7 +17,8 @@ const builder = new StateGraph(state)
     edit: 'editTaskHandler',
   })
   .addEdge('askTaskHandler', END)
-  .addEdge('editTaskHandler', END)
+  .addEdge('editTaskHandler', 'editResultHandler')
+  .addEdge('editResultHandler', END)
   .addEdge('pageTaskHandler', END);
 
 export const graph = builder.compile();
