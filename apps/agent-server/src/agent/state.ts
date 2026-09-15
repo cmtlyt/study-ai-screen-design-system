@@ -17,10 +17,17 @@ export const state = new StateSchema({
     canvas: z.record(z.string(), z.json()),
   }),
   classifycation: classifycationSchema,
-  action: z.object({
-    type: z.literal('add_node'),
-    node: z.record(z.string(), z.json()).nullable(),
-  }),
+  action: z.union([
+    z.object({
+      type: z.literal('add_node'),
+      node: z.record(z.string(), z.json()).nullable(),
+    }),
+    z.object({
+      type: z.literal('update_node'),
+      node: z.record(z.string(), z.json()).nullable(),
+      nodeId: z.string(),
+    }),
+  ]),
 });
 
 export type State = typeof state.State;

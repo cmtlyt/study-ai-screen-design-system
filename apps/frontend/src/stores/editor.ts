@@ -148,6 +148,7 @@ export const useEditorStore = defineStore('editor', () => {
     const newNodes = nodes.value.slice();
     const oldNode = newNodes[index]!;
     newNodes[index] = createNode({ ...oldNode, ...newNode, id: oldNode.id, type: oldNode.type });
+    console.debug('updateNode:', { oldNode, newNode: newNodes[index] });
     setValue(newNodes);
   };
 

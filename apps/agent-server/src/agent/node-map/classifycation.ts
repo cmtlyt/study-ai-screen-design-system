@@ -8,7 +8,10 @@ export const classifycationSchema = z.object({
   task: z
     .enum(['page', 'ask', 'edit'])
     .describe('任务类型: page-大屏设计, ask-问题回答, edit-编辑'),
-  operation: z.literal('add_node').nullable().describe('添加节点'),
+  operation: z
+    .enum(['add_node', 'update_node'])
+    .nullable()
+    .describe('add_node-新增节点, update_node-更新节点'),
 });
 
 export const classifyTaskHandler = defineNode(async (state) => {

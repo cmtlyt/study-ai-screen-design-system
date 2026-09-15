@@ -29,6 +29,11 @@ watch(
     if (!action) return;
     if (action.type === 'add_node' && action.node) {
       editorStore.addNode(action.node as any);
+      return;
+    }
+    if (action.type === 'update_node' && action.node && action.nodeId) {
+      editorStore.updateNode(action.nodeId, action.node as any);
+      return;
     }
   },
 );
