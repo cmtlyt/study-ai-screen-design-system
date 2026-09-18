@@ -8,6 +8,7 @@ import { storeToRefs } from 'pinia';
 import { useEditorStore } from '@/stores/editor';
 import { getAllMaterialSchema } from '@/materials/index';
 import { canvasSchema } from '@/schema/types/page';
+import { toJSONSchema } from '@/utils/agent-schema.ts';
 
 defineOptions({
   name: 'AiPanel',
@@ -60,7 +61,7 @@ function onSubmit() {
     selectedNodeIds: selectedNodeIds.value,
     schema: {
       material: getAllMaterialSchema(),
-      canvas: canvasSchema.toJSONSchema(),
+      canvas: toJSONSchema(canvasSchema),
     },
   });
   content.value = '';

@@ -13,7 +13,7 @@ const { selectedNodeId } = storeToRefs(editorStore);
 </script>
 
 <template>
-  <div class="p-8">
+  <div class="p-8 h-full">
     <NodeProperty v-if="selectedNodeId" />
     <CanvasProperty v-else />
   </div>

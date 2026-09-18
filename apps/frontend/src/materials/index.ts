@@ -1,6 +1,7 @@
 import type { Component } from 'vue';
 import type { Cagetory, CagetoryKey, InstallCtx, Material } from './types';
 import type { MaterialSchema, DefineMaterialSchema } from '@/schema/types';
+import { toJSONSchema } from '@/utils/agent-schema';
 
 export type * from './types';
 
@@ -80,7 +81,7 @@ export function getAllMaterialSchema() {
     return {
       type: item.schema.type,
       name: item.name,
-      schema: item.configSchema.toJSONSchema(),
+      schema: toJSONSchema(item.configSchema),
     };
   });
 }

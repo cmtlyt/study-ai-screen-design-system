@@ -1,11 +1,11 @@
-import type { ZodType } from 'zod';
+import { toJSONSchema, type ZodType } from 'zod';
 
 /**
  * 将 Zod Schema 转为浏览器端可用的 .d.ts 字符串
  * 纯同步、零依赖、专为 Monaco extraLibs 设计
  */
 export function schemaToInterface(schema: ZodType, name: string): string {
-  const jsonSchema = schema.toJSONSchema({ unrepresentable: 'any' });
+  const jsonSchema = toJSONSchema(schema, { unrepresentable: 'any' });
   const body = serializeJsonSchema(jsonSchema);
 
   // 使用 declare type 而非 interface，避免 JSON Schema 中复杂 $ref 展开问题

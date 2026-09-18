@@ -1,3 +1,5 @@
 import { z } from 'zod';
 
-export const jsonObjSchema = z.record(z.string(), z.json());
+export const jsonObjSchema = z.record(z.string(), z.json()).meta({
+  additionalProperties: true,
+});

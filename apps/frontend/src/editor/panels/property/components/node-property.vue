@@ -63,8 +63,10 @@ function editEvents() {
 </script>
 
 <template>
-  <div v-if="selectedNode">
-    <div class="border-border border-b py-8 pb-16 font-semibold flex items-center justify-between">
+  <div v-if="selectedNode" class="flex flex-col h-full overflow-y-auto scrollbar-none">
+    <div
+      class="border-border border-b py-8 pb-16 font-semibold flex items-center justify-between sticky top-0 bg-bg z-10"
+    >
       <span>当前节点: {{ selectedNode.name }}</span>
       <div
         class="flex items-center gap-8"
@@ -124,6 +126,14 @@ function editEvents() {
 </template>
 
 <style scoped lang="scss">
+.el-tabs {
+  :deep(.el-tabs__header) {
+    position: sticky;
+    top: 51rem;
+    z-index: 5;
+    background-color: var(--color-bg);
+  }
+}
 .collapse-panel {
   --el-collapse-border-color: var(--color-border);
   --el-collapse-header-height: 48rem;
