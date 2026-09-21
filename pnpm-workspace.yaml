@@ -37,7 +37,7 @@ catalog:
   'dotenv': '^17.4.2'
   'express': '5.2.1'
   'gray-matter': '^4.0.3'
-  'langchain': '^1.5.5'
+  'langchain': '^1.5.10'
   'mammoth': '^1.12.1'
   'pdf-parse': '^2.4.5'
   'prettier': '3.9.5'

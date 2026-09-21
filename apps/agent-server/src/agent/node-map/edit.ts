@@ -1,29 +1,38 @@
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { defineNode } from '../define';
 import { State } from '../state';
 import { createNoStreamModel } from '../../ai/model';
 import { ACTION_TYPES } from '../constants/action-types';
+import { createAgent, toolStrategy } from 'langchain';
+import { searchEChartsOptions } from '../../rag/tools';
 
 type MaterialSchema = State['schema']['material'][number] | undefined;
 
 async function generateNode(_state: State, materialSchema: MaterialSchema, prompt: string) {
   if (!materialSchema) return null;
+
   const schema = structuredClone(materialSchema.schema);
   (schema.properties as any).id.const = crypto.randomUUID();
   (schema.properties as any).type.const = materialSchema.type;
-  const model = createNoStreamModel().withStructuredOutput(schema, {
-    name: 'node_schema',
-    method: 'jsonSchema',
+
+  const agent = createAgent({
+    model: createNoStreamModel(),
+    tools: [searchEChartsOptions],
+    responseFormat: toolStrategy(schema as any) as any,
+    systemPrompt: `你是一个 AI 大屏设计器的节点生成助手, 请根据用户要求生成一个完整的 ${materialSchema.name} 节点
+必须遵守结构化输出 Schema
+对于可选属性, 如果用户没有明确要求可以留空
+如果是图标物料, 使用的是 ECharts, props.option 必须使用 ECharts 的配置字段完成
+\n修改的是 ECharts 配置字段, 嵌套路径或字段含义可以调用 search_echarts_options 查询 ECharts 官方配置`,
   });
 
-  const result = await model.invoke([
-    new SystemMessage(
-      `你是一个 AI 大屏设计器的物料 schema 识别助手, 请根据用户输入的内容生成${materialSchema.name}物料的配置\n\n物料 schema:\n${JSON.stringify(materialSchema.schema)}`,
-    ),
-    new HumanMessage(prompt),
-  ]);
+  const result = await agent.invoke({
+    messages: [new HumanMessage(prompt)],
+  });
 
-  return result;
+  console.debug('updateNode =>', result.structuredResponse);
+
+  return result.structuredResponse;
 }
 
 async function updateNode(
@@ -37,24 +46,34 @@ async function updateNode(
   (schema.properties as any).id.const = selectedNode.id;
   (schema.properties as any).type.const = selectedNode.type;
 
-  const model = createNoStreamModel().withStructuredOutput(schema, {
-    name: 'node_schema',
-    method: 'jsonSchema',
+  const agent = createAgent({
+    model: createNoStreamModel(),
+    tools: [searchEChartsOptions],
+    responseFormat: toolStrategy(schema as any) as any,
+    systemPrompt: `你是一个 AI 大屏设计器的节点修改助手, 当前选中的节点是 ${materialSchema.name}, 请根据用户的需求修改该节点
+必须遵守结构化输出 Schema
+对于可选属性, 如果用户没有明确要求可以留空
+如果是图表物料, 使用的是 ECharts, props.option 必须使用 ECharts 的配置字段完成
+\n修改的是 ECharts 配置字段, 嵌套路径或字段含义可以调用 search_echarts_options 查询 ECharts 官方配置
+\n规则:
+- 只能修改当前节点的 props/layout/style 等属性
+- 禁止修改节点的 id/type 等属性`,
   });
 
-  const result = await model.invoke([
-    new SystemMessage(
-      `你是一个 AI 大屏设计器的物料节点修改助手, 当前选中的节点是${materialSchema.name}请根据用户的要求修改该节点, 对于可选属性用户没有明确要求可以留空
-不允许修改节点的 id, type, name 属性, 这些属性是节点的唯一标识, 不能修改
-\n当前节点的内容 schema:\n${JSON.stringify(selectedNode)}`,
-    ),
-    new HumanMessage(prompt),
-  ]);
+  const result = await agent.invoke({
+    messages: [
+      new HumanMessage(`当前节点的内容:\n\n${JSON.stringify(selectedNode)}`),
+      new HumanMessage(prompt),
+    ],
+  });
 
-  result.id = selectedNode.id;
-  result.type = selectedNode.type;
+  const res = result.structuredResponse;
+  res.id = selectedNode.id;
+  res.type = selectedNode.type;
 
-  return result;
+  console.debug('updateNode =>', res);
+
+  return res;
 }
 
 export const editTaskHandler = defineNode(async (state) => {
