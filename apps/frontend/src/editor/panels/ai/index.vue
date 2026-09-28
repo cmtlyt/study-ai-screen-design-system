@@ -7,8 +7,8 @@ import { getThreadId, setThreadId, deleteThreadId } from './thread-storage';
 import { storeToRefs } from 'pinia';
 import { useEditorStore } from '@/stores/editor';
 import { getAllMaterialSchema } from '@/materials/index';
-import { canvasSchema } from '@/schema/types/page';
-import { toJSONSchema } from '@/utils/agent-schema.ts';
+import { canvasSchema, dataSourceSchema } from '@/schema/types/page';
+import { toJSONSchema } from '@/utils/agent-schema';
 
 defineOptions({
   name: 'AiPanel',
@@ -34,16 +34,24 @@ watch(
   (actions) => {
     if (!actions?.length) return;
     actions.forEach((action) => {
-      if (action.type === ACTION_TYPES.addNode && action.node) {
-        editorStore.addNode(action.node as any);
+      if (action.type === ACTION_TYPES.addNode && action.data) {
+        editorStore.addNode(action.data as any);
         return;
       }
-      if (action.type === ACTION_TYPES.updateNode && action.node && action.node.id) {
-        editorStore.updateNode(action.node.id as string, action.node as any);
+      if (action.type === ACTION_TYPES.updateNode && action.data?.id) {
+        editorStore.updateNode(action.data.id as string, action.data as any);
         return;
       }
-      if (action.type === ACTION_TYPES.removeNode && action.node) {
-        editorStore.removeNode(action.node as any);
+      if (action.type === ACTION_TYPES.removeNode && action.data) {
+        editorStore.removeNode(action.data as any);
+        return;
+      }
+      if (action.type === ACTION_TYPES.addDataSource && action.data) {
+        editorStore.addDataSource(action.data as any);
+        return;
+      }
+      if (action.type === ACTION_TYPES.updateDataSource && action.data?.id) {
+        editorStore.updateDataSource(action.data.id as string, action.data as any);
         return;
       }
     });
@@ -62,6 +70,7 @@ function onSubmit() {
     schema: {
       material: getAllMaterialSchema(),
       canvas: toJSONSchema(canvasSchema),
+      dataSource: toJSONSchema(dataSourceSchema),
     },
   });
   content.value = '';

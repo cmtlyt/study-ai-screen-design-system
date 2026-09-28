@@ -1,9 +1,6 @@
-import type { ZodObject } from 'zod';
+import type { ZodType } from 'zod';
 
-export function toJSONSchema(
-  schema: ZodObject,
-  options?: Parameters<ZodObject['toJSONSchema']>[0],
-) {
+export function toJSONSchema(schema: ZodType, options?: Parameters<ZodType['toJSONSchema']>[0]) {
   return schema.toJSONSchema({
     override(ctx) {
       const { jsonSchema } = ctx;

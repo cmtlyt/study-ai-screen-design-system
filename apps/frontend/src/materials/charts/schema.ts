@@ -51,8 +51,8 @@ const chartOptionSchema = z
     tooltip: jsonObjSchema.optional().describe('EChart 提示框配置'),
     dataset: chartDatasetSchema.optional(),
     grid: chartGridSchema.optional(),
-    xAxis: jsonObjSchema.optional().describe('直角坐标系 x 轴配置'),
-    yAxis: jsonObjSchema.optional().describe('直角坐标系 y 轴配置'),
+    xAxis: jsonObjSchema.describe('直角坐标系 x 轴配置'),
+    yAxis: jsonObjSchema.describe('直角坐标系 y 轴配置'),
     series: z.array(jsonObjSchema).min(1).describe('EChart 系列配置, 包含真实 type/encode 和样式'),
   })
   .describe('EChart 配置');

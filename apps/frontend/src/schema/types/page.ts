@@ -9,14 +9,14 @@ export const canvasSchema = z.object({
 
 export type CanvasSchema = z.infer<typeof canvasSchema>;
 
-const staticDataSourceSchema = z.object({
+export const staticDataSourceSchema = z.object({
   type: z.literal('static'),
   id: z.string(),
   name: z.string(),
   data: z.any(),
 });
 
-const dataSourceSchema = z.union([
+export const dataSourceSchema = z.union([
   staticDataSourceSchema,
   z.object({
     ...staticDataSourceSchema.shape,

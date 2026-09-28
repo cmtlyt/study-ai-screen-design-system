@@ -1,5 +1,10 @@
 import { useUndoRedo } from '@/composables/use-undo-redo';
-import { pageSchema, type MaterialSchema, type PageSchema } from '@/schema/types';
+import {
+  pageSchema,
+  type DataSourceSchema,
+  type MaterialSchema,
+  type PageSchema,
+} from '@/schema/types';
 import { createNode, isParsedNode } from '@/materials';
 import { defineStore } from 'pinia';
 import { deepClone } from '@/utils';
@@ -188,6 +193,17 @@ export const useEditorStore = defineStore('editor', () => {
     Object.assign(page.value, result.data);
   };
 
+  const addDataSource = (_dataSource: DataSourceSchema) => {
+    setValue([...dataSource.value, _dataSource], dataSource);
+  };
+
+  const updateDataSource = (id: string, _dataSource: DataSourceSchema) => {
+    setValue(
+      dataSource.value.map((ds) => (ds.id === id ? _dataSource : ds)),
+      dataSource,
+    );
+  };
+
   return {
     page,
     canvas,
@@ -212,5 +228,7 @@ export const useEditorStore = defineStore('editor', () => {
     updatePage,
     updatePageId,
     initPage,
+    addDataSource,
+    updateDataSource,
   };
 });

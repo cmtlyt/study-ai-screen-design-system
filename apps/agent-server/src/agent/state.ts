@@ -1,7 +1,8 @@
 import { MessagesValue, StateSchema } from '@langchain/langgraph';
 import z from 'zod';
 import { classifycationSchema } from './node-map/classifycation';
-import { planEditSchema, actionTypeSchema } from './node-map/edit-plan';
+import { planEditSchema } from './node-map/edit-plan';
+import { actionTypeSchema } from './constants/action-types';
 
 export const state = new StateSchema({
   messages: MessagesValue,
@@ -16,13 +17,14 @@ export const state = new StateSchema({
       }),
     ),
     canvas: z.record(z.string(), z.json()),
+    dataSource: z.record(z.string(), z.json()),
   }),
   classifycation: classifycationSchema,
   actions: z
     .array(
       z.looseObject({
         type: actionTypeSchema,
-        node: z.record(z.string(), z.json()).nullable(),
+        data: z.record(z.string(), z.json()).nullable(),
       }),
     )
     .nullable(),

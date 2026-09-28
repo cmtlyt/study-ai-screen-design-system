@@ -1,14 +1,11 @@
-import { AIMessage, HumanMessage } from '@langchain/core/messages';
-import { defineNode } from '../define';
-import { State } from '../state';
-import { createNoStreamModel } from '../../ai/model';
-import { ACTION_TYPES } from '../constants/action-types';
-import { createAgent, toolStrategy } from 'langchain';
-import { searchEChartsOptions } from '../../rag/tools';
+import { createAgent, HumanMessage, toolStrategy } from 'langchain';
+import { createNoStreamModel } from '../../../ai/model';
+import { searchEChartsOptions } from '../../../rag/tools';
+import { State } from '../../state';
 
 type MaterialSchema = State['schema']['material'][number] | undefined;
 
-async function generateNode(_state: State, materialSchema: MaterialSchema, prompt: string) {
+export async function generateNode(_state: State, materialSchema: MaterialSchema, prompt: string) {
   if (!materialSchema) return null;
 
   const schema = structuredClone(materialSchema.schema);
@@ -35,7 +32,7 @@ async function generateNode(_state: State, materialSchema: MaterialSchema, promp
   return result.structuredResponse;
 }
 
-async function updateNode(
+export async function updateNode(
   _state: State,
   selectedNode: any,
   materialSchema: MaterialSchema,
@@ -75,43 +72,3 @@ async function updateNode(
 
   return res;
 }
-
-export const editTaskHandler = defineNode(async (state) => {
-  const { editPlan: plans } = state;
-  const actions: any[] = [];
-
-  for (const plan of plans || []) {
-    const { type, id, action, prompt } = plan;
-    const schema = state.schema.material.find((item) => item.type === type);
-
-    if (action === ACTION_TYPES.addNode) {
-      const node = (await generateNode(state, schema, prompt)) || {};
-      actions.push({ type: ACTION_TYPES.addNode, node });
-    }
-
-    if (action === ACTION_TYPES.updateNode) {
-      const selectedNode = (state.page.nodes as any[]).find((node) => node.id === id);
-      if (!selectedNode) {
-        return { messages: [new AIMessage('未找到选中的节点')] };
-      }
-
-      const node = (await updateNode(state, selectedNode, schema, prompt)) || {};
-
-      actions.push({ type: ACTION_TYPES.updateNode, node });
-    }
-
-    if (action === ACTION_TYPES.removeNode) {
-      const selectedNode = (state.page.nodes as any[]).find((node) => node.id === id);
-      if (!selectedNode) {
-        return { messages: [new AIMessage('未找到选中的节点')] };
-      }
-
-      actions.push({ type: ACTION_TYPES.removeNode, node: selectedNode });
-    }
-  }
-
-  return {
-    actions,
-    editPlan: null,
-  };
-});
